@@ -3,52 +3,79 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
+	"os"
 )
 
-func generateName() string {
-	return fmt.Sprintf("User %d", rand.Intn(100)+1)
+func printUsage(appname string) {
+	fmt.Printf("Usage: %s server [<port>] or\n", appname)
+	fmt.Printf("Usage: %s client [<nickname>] [<address>] [<port>] \n", appname)
 }
 
-func startDialog(clientInputChannel <-chan ClientInput) {
-	w := &World{}
-
-	for input := range clientInputChannel {
-		switch event := input.event.(type) {
-		case *MessageEvent:
-			fmt.Println("Received Message: ", event.msg)
-			// TODO: error handling
-			input.user.session.WriteLine(fmt.Sprintf("You said \"%s\"\r\n", event.msg))
-
-			for _, user := range w.users {
-				if user != input.user {
-					user.session.WriteLine(fmt.Sprintf("%s said, \"%s\"", input.user.name, event.msg))
-				}
+func checkArgs(whoami *WhoAmI) error {
+	arguments := os.Args
+	if len(arguments) == 1 {
+		printUsage(arguments[0])
+		// TODO: error handling
+		return fmt.Errorf("parameter error")
+	} else if arguments[1] == "client" {
+		whoami.server = false
+		if len(arguments) == 2 {
+			whoami.addr = "localhost"
+			whoami.port = "8080"
+			whoami.nick = "J_Doe"
+		} else if len(arguments) >= 3 {
+			whoami.nick = arguments[2]
+			if len(arguments) >= 4 {
+				whoami.addr = arguments[3]
 			}
-		case *UserJoinedEvent:
-			fmt.Println("User joined: ", input.user.name)
-			w.users = append(w.users, input.user)
-			input.user.session.WriteLine(fmt.Sprintf("Welcome %s", input.user.name))
-			for _, user := range w.users {
-				if user != input.user {
-					user.session.WriteLine(fmt.Sprintf("%s entered the room", input.user.name))
-				}
+			if len(arguments) == 5 {
+				whoami.port = arguments[4]
 			}
-		case *UserLeftEvent:
-			fmt.Printf("User: %s, %s", event.user.name, event.msg)
 		}
+	} else if arguments[1] == "server" {
+		whoami.server = true
+		if len(arguments) == 2 {
+			whoami.port = "8080"
+		} else if len(arguments) == 3 {
+			whoami.port = arguments[2]
+		}
+	} else {
+		printUsage(arguments[0])
+		// TODO: error handling
+		return fmt.Errorf("parameter error")
 	}
+	return nil
 }
 
 func main() {
 
-	ch := make(chan ClientInput)
-
-	go startDialog(ch)
-
-	err := startServer(ch)
-	if err != nil {
-		log.Fatal(err)
+	whoami := WhoAmI{
+		server: false,
+		addr:   "localhost",
+		port:   "8080",
+		nick:   "JDOE",
 	}
 
+	getParams := checkArgs(&whoami)
+
+	var mport string
+	if whoami.port[0] != ':' {
+		mport = ":" + whoami.port
+	} else {
+		mport = whoami.port
+	}
+	ch := make(chan ClientInput)
+
+	if getParams == nil {
+		if whoami.server {
+			go startServerDialogHandling(ch)
+			err := startServer(ch, mport)
+			if err != nil {
+				log.Fatal(err)
+			}
+		} else {
+			connect := whoami.addr + mport
+			clientDialogHandling(connect, whoami.nick)
+		}
+	}
 }

@@ -1,6 +1,10 @@
 package main
 
-import "net"
+import (
+	"fmt"
+	"math/rand"
+	"net"
+)
 
 type MessageEvent struct {
 	msg string
@@ -28,6 +32,13 @@ type Session struct {
 	conn net.Conn
 }
 
+type WhoAmI struct {
+	server bool
+	addr   string
+	port   string
+	nick   string
+}
+
 type World struct {
 	users []*User
 }
@@ -35,4 +46,8 @@ type World struct {
 func (s *Session) WriteLine(str string) error {
 	_, err := s.conn.Write([]byte(str + "\r\n"))
 	return err
+}
+
+func generateName() string {
+	return fmt.Sprintf("User %d", rand.Intn(100)+1)
 }
