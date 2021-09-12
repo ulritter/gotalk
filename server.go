@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net"
+	"strings"
+	"time"
 )
 
 func startServerDialogHandling(clientInputChannel <-chan ClientInput) {
@@ -12,19 +14,20 @@ func startServerDialogHandling(clientInputChannel <-chan ClientInput) {
 	for input := range clientInputChannel {
 		switch event := input.event.(type) {
 		case *MessageEvent:
-			fmt.Println("Received Message: ", event.msg)
+			currentTime := time.Now()
+			fmt.Printf("Received Message at %s from [%s]: %s\n", currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
 			// TODO: error handling
-			input.user.session.WriteLine(fmt.Sprintf("You said \"%s\"\r\n", event.msg))
+			// input.user.session.WriteLine(fmt.Sprintf("You said \"%s\"\r\n", event.msg))
 
 			for _, user := range w.users {
 				if user != input.user {
-					user.session.WriteLine(fmt.Sprintf("%s said, \"%s\"", input.user.name, event.msg))
+					user.session.WriteLine(fmt.Sprintf("[%s]: %s", input.user.name, event.msg))
 				}
 			}
 		case *UserJoinedEvent:
 			fmt.Println("User joined: ", input.user.name)
 			w.users = append(w.users, input.user)
-			input.user.session.WriteLine(fmt.Sprintf("Welcome %s", input.user.name))
+			input.user.session.WriteLine(fmt.Sprintf("Welcome %s\n", input.user.name))
 			for _, user := range w.users {
 				if user != input.user {
 					user.session.WriteLine(fmt.Sprintf("%s entered the room", input.user.name))
@@ -40,7 +43,20 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput) error {
 	buf := make([]byte, 4096)
 
 	session := &Session{conn}
-	user := &User{name: generateName(), session: session}
+	n, err := conn.Read(buf)
+	if err != nil {
+		log.Println("Error reading from buffer", err)
+		return err
+	}
+	var nick string
+	pattern := string(buf[:n])
+	if (pattern[0] == '$') && (pattern[1] == '$') && (pattern[2] == '$') && (pattern[n-1] == '$') {
+		nick = string(buf[3 : n-1])
+	} else {
+		nick = "J_Doe"
+	}
+
+	user := &User{name: nick, session: session}
 	inputChannel <- ClientInput{
 		user,
 		&UserJoinedEvent{},
@@ -60,8 +76,8 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput) error {
 			}
 		}
 		// TODO: check real empty imput like ^d
-		msg := string(buf[:n-2])
-		log.Println("Received message:", msg)
+		msg := strings.TrimSpace(string(string(buf[:n])))
+		// log.Println("Received message:", msg)
 
 		e := ClientInput{user, &MessageEvent{msg}}
 		inputChannel <- e
