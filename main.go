@@ -6,32 +6,19 @@ import (
 
 func main() {
 
-	whoami := WhoAmI{
-		server: false,
-		addr:   "localhost",
-		port:   "8080",
-		nick:   "J_Doe",
-	}
-
+	whoami := WhoAmI{}
 	getParams := checkArgs(&whoami)
-
-	var mport string
-	if whoami.port[0] != ':' {
-		mport = ":" + whoami.port
-	} else {
-		mport = whoami.port
-	}
 	ch := make(chan ClientInput)
 
 	if getParams == nil {
 		if whoami.server {
 			go serverDialogHandling(ch)
-			err := startServer(ch, mport)
+			err := startServer(ch, whoami.port)
 			if err != nil {
 				log.Fatal(err)
 			}
 		} else {
-			connect := whoami.addr + mport
+			connect := whoami.addr + whoami.port
 			clientDialogHandling(connect, whoami.nick)
 		}
 	}
