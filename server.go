@@ -31,7 +31,7 @@ func serverDialogHandling(clientInputChannel <-chan ClientInput) {
 				}
 			}
 		case *UserLeftEvent:
-			log.Printf("User left: %s, %s\n", event.msg, event.user.name)
+			log.Printf("User left: %s: %s\n", event.msg, event.user.name)
 			var users []*User
 			for _, user := range room.users {
 				if user != input.user {
@@ -92,7 +92,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput) error {
 }
 
 func startServer(eventChannel chan ClientInput, port string) error {
-	log.Println("Starting server")
+	log.Println("Starting server on", port)
 	ln, err := net.Listen("tcp", port)
 	if err != nil {
 		// handle error
