@@ -53,7 +53,7 @@ func main() {
 		server: false,
 		addr:   "localhost",
 		port:   "8080",
-		nick:   "JDOE",
+		nick:   "J_Doe",
 	}
 
 	getParams := checkArgs(&whoami)
@@ -68,7 +68,7 @@ func main() {
 
 	if getParams == nil {
 		if whoami.server {
-			go startServerDialogHandling(ch)
+			go serverDialogHandling(ch)
 			err := startServer(ch, mport)
 			if err != nil {
 				log.Fatal(err)

@@ -1,8 +1,6 @@
 package main
 
 import (
-	"fmt"
-	"math/rand"
 	"net"
 )
 
@@ -39,15 +37,11 @@ type WhoAmI struct {
 	nick   string
 }
 
-type World struct {
+type Room struct {
 	users []*User
 }
 
 func (s *Session) WriteLine(str string) error {
 	_, err := s.conn.Write([]byte(str + "\r\n"))
 	return err
-}
-
-func generateName() string {
-	return fmt.Sprintf("User %d", rand.Intn(100)+1)
 }
