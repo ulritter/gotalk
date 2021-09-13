@@ -13,20 +13,18 @@ import (
 // TODO: error handling for whole function
 func clientDialogHandling(connect string, nick string) {
 	buf := make([]byte, 4096)
-	c, err := net.Dial("tcp", connect)
+	conn, err := net.Dial("tcp", connect)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	// TODO: send user name nick
 	fmt.Printf("Connected to: %s, Nickname: %s\n", connect, nick)
-	fmt.Fprintf(c, "$$$"+nick+"$")
+	fmt.Fprintf(conn, "$$$"+nick+"$")
 
 	for {
-
 		go func() {
 			for { // TODO: error handling
-				n, err := c.Read(buf)
+				n, err := conn.Read(buf)
 				if err != nil {
 					log.Println("Error reading from buffer", err)
 					return
@@ -38,7 +36,6 @@ func clientDialogHandling(connect string, nick string) {
 
 		ch := make(chan string)
 		go func(ch chan string) {
-			/* Uncomment this block to actually read from stdin */
 			reader := bufio.NewReader(os.Stdin)
 			for {
 				s, err := reader.ReadString('\n')
@@ -48,9 +45,6 @@ func clientDialogHandling(connect string, nick string) {
 				}
 				ch <- s
 			}
-			// Simulating stdin
-			// ch <- "A line of text"
-			close(ch)
 		}(ch)
 
 	stdinloop:
@@ -61,10 +55,10 @@ func clientDialogHandling(connect string, nick string) {
 					break stdinloop
 				} else {
 					msg := strings.TrimSpace(string(stdin))
-					fmt.Fprintln(c, msg)
-					if strings.TrimSpace(string(stdin)) == "STOP" {
+					fmt.Fprintln(conn, msg)
+					if msg == "STOP" {
 						fmt.Println("TCP client exiting...")
-						c.Close()
+						conn.Close()
 						return
 					}
 				}

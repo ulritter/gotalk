@@ -8,33 +8,38 @@ import (
 	"time"
 )
 
-func startServerDialogHandling(clientInputChannel <-chan ClientInput) {
-	w := &World{}
-
+func serverDialogHandling(clientInputChannel <-chan ClientInput) {
+	room := &Room{}
 	for input := range clientInputChannel {
 		switch event := input.event.(type) {
 		case *MessageEvent:
 			currentTime := time.Now()
-			fmt.Printf("Received Message at %s from [%s]: %s\n", currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
-			// TODO: error handling
-			// input.user.session.WriteLine(fmt.Sprintf("You said \"%s\"\r\n", event.msg))
+			log.Printf("Received Message at %s from [%s]: %s\n", currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
 
-			for _, user := range w.users {
+			for _, user := range room.users {
 				if user != input.user {
 					user.session.WriteLine(fmt.Sprintf("[%s]: %s", input.user.name, event.msg))
 				}
 			}
 		case *UserJoinedEvent:
-			fmt.Println("User joined: ", input.user.name)
-			w.users = append(w.users, input.user)
+			log.Println("User joined: ", input.user.name)
+			room.users = append(room.users, input.user)
 			input.user.session.WriteLine(fmt.Sprintf("Welcome %s\n", input.user.name))
-			for _, user := range w.users {
+			for _, user := range room.users {
 				if user != input.user {
 					user.session.WriteLine(fmt.Sprintf("%s entered the room", input.user.name))
 				}
 			}
 		case *UserLeftEvent:
-			fmt.Printf("User: %s, %s", event.user.name, event.msg)
+			log.Printf("User left: %s, %s\n", event.msg, event.user.name)
+			var users []*User
+			for _, user := range room.users {
+				if user != input.user {
+					user.session.WriteLine(fmt.Sprintf("%s left the room", input.user.name))
+					users = append(users, user)
+				}
+			}
+			room.users = users
 		}
 	}
 }
@@ -68,16 +73,17 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput) error {
 			log.Println("Error reading from buffer", err)
 			return err
 		}
-		if n == 0 {
-			log.Println("Zero bytes, closing connection")
+		pattern := string(buf[:n])
+		if (n == 0) || ((pattern[0] == 'S') && (pattern[1] == 'T') && (pattern[2] == 'O') && (pattern[3] == 'P')) {
+			log.Println("End condition, closing connection")
 			inputChannel <- ClientInput{
 				user,
 				&UserLeftEvent{user, "Goodbye"},
 			}
+			break
 		}
-		// TODO: check real empty imput like ^d
+
 		msg := strings.TrimSpace(string(string(buf[:n])))
-		// log.Println("Received message:", msg)
 
 		e := ClientInput{user, &MessageEvent{msg}}
 		inputChannel <- e
