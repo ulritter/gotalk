@@ -21,7 +21,8 @@ Server termination by SIGHUP (for the time being)
 
 	gotalk client [<nickname> [<address>] [<port>]]
 
-Client termination by entering STOP
+Client commands:
+- /exit = terminate connection and exit
 
 &NewLine;   
 &NewLine;   
