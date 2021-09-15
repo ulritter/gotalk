@@ -22,7 +22,9 @@ Server termination by SIGHUP (for the time being)
 	gotalk client [<nickname> [<address>] [<port>]]
 
 Client commands:
-- /exit = terminate connection and exit
+- /exit - terminate connection and exit
+- /list - displays active users in room
+- /nick <nickname> - change nickname
 
 &NewLine;   
 &NewLine;   
