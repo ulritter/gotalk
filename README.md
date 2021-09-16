@@ -1,9 +1,18 @@
 # gotalk
 
 ## Simple Multi-user ad-hoc communication program.
-## The communication is secured using tls over tcp.
-## The program can be started in server mode or in client mode (see below)
+**The communication is secured using tls over tcp. The program can be started in server mode or in client mode (see below)**
 
+Parts of this program are based on the great golang jump-start tutorial by David Byttow:
+https://www.youtube.com/watch?v=oyKrI8e1-9U
+
+https://github.com/davidbyttow
+
+
+Thank you very much!
+
+&NewLine;  
+&NewLine; 
 **Build the software:**
 - install golang
 - clone / download this repo
