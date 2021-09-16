@@ -51,7 +51,7 @@ Server termination by SIGHUP (for the time being)
 
 Client commands:
 - `/exit` - terminate connection and exit
-- `/list` - displays active users in roo  m
+- `/list` - displays active users in room
 - `/nick <nickname>` - change nickname
 
 &NewLine;   
