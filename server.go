@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -121,9 +122,9 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 	return nil
 }
 
-func startServer(eventChannel chan ClientInput, port string, nl Newline) error {
+func startServer(eventChannel chan ClientInput, config *tls.Config, port string, nl Newline) error {
 	log.Printf("Starting server on %s"+nl.NewLine(), port)
-	ln, err := net.Listen("tcp", port)
+	ln, err := tls.Listen("tcp", port, config)
 	if err != nil {
 		// handle error
 		return err

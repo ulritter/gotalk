@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
@@ -60,9 +61,9 @@ func parseCommand(conn net.Conn, msg string, nl Newline) int {
 
 // TODO: error handling for whole function
 
-func clientDialogHandling(connect string, nick string, nl Newline) error {
+func clientDialogHandling(connect string, config *tls.Config, nick string, nl Newline) error {
 	buf := make([]byte, BUFSIZE)
-	conn, err := net.Dial("tcp", connect)
+	conn, err := tls.Dial("tcp", connect, config)
 	if err != nil {
 		fmt.Println(err)
 		return err
