@@ -14,7 +14,7 @@ func checkArgs(whoami *WhoAmI) error {
 	// TODO: beautify parameter handling
 
 	whoami.server = false
-	whoami.addr = "127.0.0.1"
+	whoami.addr = "localhost"
 	whoami.port = ":8089"
 	whoami.nick = "J_Doe"
 

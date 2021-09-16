@@ -17,6 +17,7 @@ func sendServerCommand(conn net.Conn, cmd string) error {
 }
 
 func printHelp(nl Newline) {
+	// TODO: create help text
 	fmt.Print("HELP TEXT" + nl.NewLine())
 }
 

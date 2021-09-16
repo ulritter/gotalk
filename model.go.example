@@ -24,7 +24,7 @@ const BUFSIZE = 16384
 // command for serverKey: openssl ecparam -genkey -name prime256v1 -out server.key
 // command for root Cert: openssl req -new -x509 -key server.key -out server.pem -days 3650
 //
-<< command: openssl ecparam -genkey -name prime256v1 -out server.key
+
 const serverKey = `-----BEGIN EC PARAMETERS-----
 < some stuff >
 -----END EC PARAMETERS-----
