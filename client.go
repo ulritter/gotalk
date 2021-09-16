@@ -29,8 +29,6 @@ func parseCommand(conn net.Conn, msg string, nl Newline) int {
 		return CODE_NOCMD
 	} else {
 		cmdstring := msg[1:]
-		// fmt.Println("command recognized:", cmdstring)
-		//TODO: split in words
 		cmd := strings.Fields(cmdstring)
 		switch cmd[0] {
 		case CMD_EXIT:
@@ -43,7 +41,6 @@ func parseCommand(conn net.Conn, msg string, nl Newline) int {
 			sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
 			return CODE_DONOTHING
 		case CMD_CHANGENICK:
-			// TODO: discard spaces
 			cmd_arguments := cmd[1:]
 			if len(cmd_arguments) != 1 {
 				printError(nl)
@@ -89,7 +86,7 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 			reader := bufio.NewReader(os.Stdin)
 			for {
 				s, err := reader.ReadString('\n')
-				if err != nil { // Maybe log non io.EOF errors, if you want
+				if err != nil {
 					close(ch)
 					return
 				}
@@ -121,7 +118,7 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 					}
 				}
 			case <-time.After(1 * time.Second):
-				// Do something when there is nothing read from stdin
+				// TODO:
 			}
 		}
 	}

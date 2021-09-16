@@ -1,8 +1,10 @@
 # gotalk
 
-## Simple Multi-user ad-hoc communication program
+## Simple Multi-user ad-hoc communication program.
+## The communication is secured using tls over tcp.
+## The program can be started in server mode or in client mode (see below)
 
-Build installing golang, by cloning this repo and by
+Build: install golang, clone / download this repo and
 
     go build
 
@@ -11,13 +13,13 @@ to build the software
 &NewLine;  
 &NewLine;  
 
-**Server invocation:**
+**Server mode invocation:**
 
 	gotalk server [<port>] 
 
 Server termination by SIGHUP (for the time being)
 
-**Client invocation:**
+**Client mode invocation:**
 
 	gotalk client [<nickname> [<address>] [<port>]]
 

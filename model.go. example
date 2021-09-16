@@ -19,23 +19,21 @@ const CODE_DONOTHING = 2
 
 const BUFSIZE = 16384
 
+//
 // hard-wired tls key / certificate for test purposes
+// command for serverKey: openssl ecparam -genkey -name prime256v1 -out server.key
+// command for root Cert: openssl req -new -x509 -key server.key -out server.pem -days 3650
+//
+<< command: openssl ecparam -genkey -name prime256v1 -out server.key
 const serverKey = `-----BEGIN EC PARAMETERS-----
-BggqhkjOPQMBBw==
+< some stuff >
 -----END EC PARAMETERS-----
 -----BEGIN EC PRIVATE KEY-----
-MHcCAQEEII1rgpj11/thNhne5jla7jJhdya34h3amxH+iYXduCC4oAoGCCqGSM49
-AwEHoUQDQgAEeYUzwiEc8qzUWYOJPKEbKWlVvexG40pqsQA0eSaHRXXPV2gnrsWT
-mUXfkjuYEpEREZgZH1HpiCjpy5hLAuQp7w==
+< some stuff >
 -----END EC PRIVATE KEY-----
 `
 const rootCert = `-----BEGIN CERTIFICATE-----
-MIIBCTCBsAIJAO2vPzVY2coAMAoGCCqGSM49BAMCMA0xCzAJBgNVBAYTAkRFMB4X
-DTIxMDkxNjA4MzYwOFoXDTMxMDkxNDA4MzYwOFowDTELMAkGA1UEBhMCREUwWTAT
-BgcqhkjOPQIBBggqhkjOPQMBBwNCAAR5hTPCIRzyrNRZg4k8oRspaVW97EbjSmqx
-ADR5JodFdc9XaCeuxZOZRd+SO5gSkRERmBkfUemIKOnLmEsC5CnvMAoGCCqGSM49
-BAMCA0gAMEUCIDKpwLhrMJWUJFcI5NC4YqQzcDaAHZTbOgRRIHsDZyCIAiEA+JZV
-CgCeRmOCnFDNFFf9fl6ABui6hpRmwHj2dAK4e+U=
+< some stuff >
 -----END CERTIFICATE-----
 `
 
