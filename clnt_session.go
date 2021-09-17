@@ -18,7 +18,10 @@ func sendServerCommand(conn net.Conn, cmd string) error {
 
 func printHelp(nl Newline) {
 	// TODO: create help text
-	fmt.Print("HELP TEXT" + nl.NewLine())
+	fmt.Print("Available commands:" + nl.NewLine())
+	fmt.Print("- `/exit` - terminate connection and exit" + nl.NewLine())
+	fmt.Print("- `/list` - displays active users in room" + nl.NewLine())
+	fmt.Print("- `/nick <nickname>` - change nickname" + nl.NewLine())
 }
 
 func printError(nl Newline) {
