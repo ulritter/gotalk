@@ -43,7 +43,6 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 					&UserLeftEvent{user, "Goodbye"},
 				}
 				return err
-				//break
 			} else if (len(pattern) == 2) && (pattern[0] == (CMD_CHANGENICK)) {
 				inputChannel <- ClientInput{
 					user,

@@ -30,7 +30,7 @@ type Ui struct {
 	ui_ref  *Ui
 }
 
-func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
+func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.input = widget.NewEntry()
 	u.mLabel = widget.NewLabel("Messages")
 	u.mOutput = widget.NewLabel("")
@@ -48,8 +48,6 @@ func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 			u.win.Canvas().Focus(u.input)
 		}
 	})
-
-	//TODO: make everything relative to actial wundow size
 
 	vline := canvas.NewRectangle(color.Gray{})
 	vline.Resize(fyne.NewSize(3, 400))

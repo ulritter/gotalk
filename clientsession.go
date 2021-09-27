@@ -109,7 +109,7 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 	myWindow := myApp.NewWindow(WINTITLE)
 
 	ui := &Ui{win: myWindow}
-	ui_content := ui.makeUi(conn, nl)
+	ui_content := ui.newUi(conn, nl)
 
 	ui.ShowStatus(fmt.Sprintf("Connected to: %s, Nickname: %s %s", connect, nick, nl.NewLine()))
 
