@@ -13,19 +13,16 @@ func serverDialogHandling(clientInputChannel <-chan ClientInput, nl Newline) {
 		case *MessageEvent:
 			currentTime := time.Now()
 			log.Printf("Received Message at %s from [%s]: %s"+nl.NewLine(), currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
-
 			for _, user := range room.users {
-				if user != input.user {
-					user.session.WriteString(fmt.Sprintf("[%s]: %s"+nl.NewLine(), input.user.name, event.msg))
-				}
+				user.session.WriteString(fmt.Sprintf("[%s]: %s", input.user.name, event.msg))
 			}
 		case *UserJoinedEvent:
 			log.Print("User joined: "+nl.NewLine(), input.user.name)
 			room.users = append(room.users, input.user)
-			input.user.session.WriteString(fmt.Sprintf("Welcome %s"+nl.NewLine(), input.user.name))
+			input.user.session.WriteStatus(fmt.Sprintf("Welcome %s", input.user.name))
 			for _, user := range room.users {
 				if user != input.user {
-					user.session.WriteString(fmt.Sprintf("%s entered the room"+nl.NewLine(), input.user.name))
+					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"%s entered the room", input.user.name))
 				}
 			}
 		case *UserLeftEvent:
@@ -33,7 +30,7 @@ func serverDialogHandling(clientInputChannel <-chan ClientInput, nl Newline) {
 			var users []*User
 			for _, user := range room.users {
 				if user != input.user {
-					user.session.WriteString(fmt.Sprintf("%s left the room"+nl.NewLine(), input.user.name))
+					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"%s left the room", input.user.name))
 					users = append(users, user)
 				}
 			}
@@ -43,17 +40,19 @@ func serverDialogHandling(clientInputChannel <-chan ClientInput, nl Newline) {
 			log.Printf("User %s has changed his nick to: %s"+nl.NewLine(), event.user.name, event.nick)
 			for _, user := range room.users {
 				if user != input.user {
-					user.session.WriteString(fmt.Sprintf("[%s] has changed his nick to: [%s]"+nl.NewLine(), event.user.name, event.nick))
+					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"[%s] has changed his nick to: [%s]", event.user.name, event.nick))
 
+				} else {
+					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"You have changed your nick from [%s] to [%s]", event.user.name, event.nick))
 				}
 			}
 			input.user.name = event.nick
 		case *ListUsersEvent:
 			log.Printf("User %s has requested user list"+nl.NewLine(), input.user.name)
-			input.user.session.WriteString(fmt.Sprint("User list:" + nl.NewLine()))
-			input.user.session.WriteString(fmt.Sprint("==========" + nl.NewLine()))
+			input.user.session.WriteStatus(nl.NewLine() + "User list:" + nl.NewLine() + "==========")
+
 			for _, user := range room.users {
-				input.user.session.WriteString(fmt.Sprintf("[%s] has joined at [%s]"+nl.NewLine(), user.name, user.timejoined))
+				input.user.session.WriteStatus(fmt.Sprintf("[%s] - joined at [%s]", user.name, user.timejoined))
 			}
 		}
 	}

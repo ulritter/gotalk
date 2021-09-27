@@ -3,3 +3,4 @@ gotalk.exe
 server.key
 server.pem
 model.go
+clientsession.go.nugui

@@ -92,10 +92,19 @@ func (s *Session) WriteString(str string) error {
 	_, err := s.conn.Write([]byte(str))
 	return err
 }
+func (s *Session) WriteStatus(str string) error {
+	str = string(CMD_ESCAPE_CHAR) + str
+	_, err := s.conn.Write([]byte(str))
+	return err
+}
 func (n *Newline) NewLine() string {
 	return n.nl
 }
 
-func (n *Newline) SetNewLine(nline string) {
-	n.nl = nline
+func (n *Newline) Init() {
+	if runtime.GOOS == "windows" {
+		n.nl = "\r\n"
+	} else {
+		n.nl = "\n"
+	}
 }

@@ -1,14 +1,15 @@
 package main
 
 import (
-	"bufio"
 	"crypto/tls"
 	"fmt"
 	"log"
 	"net"
 	"os"
 	"strings"
-	"time"
+
+	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/app"
 )
 
 func sendServerCommand(conn net.Conn, cmd string) error {
@@ -62,6 +63,24 @@ func parseCommand(conn net.Conn, msg string, nl Newline) int {
 
 // TODO: error handling for whole function
 
+func processInput(conn net.Conn, msg string, nl Newline) error {
+
+	if len(msg) > 0 {
+		switch cC := parseCommand(conn, msg, nl); cC {
+		case CODE_NOCMD:
+			fmt.Fprintln(conn, msg)
+		case CODE_EXIT:
+			conn.Close()
+			os.Exit(0)
+		case CODE_DONOTHING:
+			fallthrough
+		default:
+			break
+		}
+	}
+	return nil
+}
+
 func clientDialogHandling(connect string, config *tls.Config, nick string, nl Newline) error {
 	buf := make([]byte, BUFSIZE)
 	conn, err := tls.Dial("tcp", connect, config)
@@ -69,61 +88,39 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 		fmt.Println(err)
 		return err
 	}
-	fmt.Printf("Connected to: %s, Nickname: %s %s", connect, nick, nl.NewLine())
+
+	myApp := app.NewWithID(APPTITLE)
+	myWindow := myApp.NewWindow(WINTITLE)
+	myWindow.Resize(fyne.NewSize(1200, 800))
+
+	ui := &Ui{win: myWindow}
+	ui_content := ui.makeUi(conn, nl)
+
+	ui.ShowStatus(fmt.Sprintf("Connected to: %s, Nickname: %s %s", connect, nick, nl.NewLine()))
+
 	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR))
 
-	for {
-		go func() {
-			for { // TODO: error handling
-				n, err := conn.Read(buf)
-				if err != nil {
-					log.Printf("Error reading from buffer, most likely server was terminated" + nl.NewLine())
-					os.Exit(1)
-				}
+	go func() {
+		for { // TODO: error handling
+			n, err := conn.Read(buf)
+			if err != nil {
+				log.Printf("Error reading from buffer, most likely server was terminated" + nl.NewLine())
+				conn.Close()
+				os.Exit(1)
+			}
+			if buf[0] != CMD_ESCAPE_CHAR {
 				msg := string(buf[:n])
-				fmt.Print(msg)
-			}
-		}()
-
-		ch := make(chan string)
-		go func(ch chan string) {
-			reader := bufio.NewReader(os.Stdin)
-			for {
-				s, err := reader.ReadString('\n')
-				if err != nil {
-					close(ch)
-					return
-				}
-				ch <- s
-			}
-		}(ch)
-
-	stdinloop:
-		for {
-			select {
-			case stdin, ok := <-ch:
-				if !ok {
-					break stdinloop
-				} else {
-					msg := strings.TrimSpace(string(stdin))
-					if len(msg) > 0 {
-						switch cC := parseCommand(conn, msg, nl); cC {
-						case CODE_NOCMD:
-							fmt.Fprintln(conn, msg)
-						case CODE_EXIT:
-							fmt.Print("TCP client exiting..." + nl.NewLine())
-							conn.Close()
-							return nil
-						case CODE_DONOTHING:
-							fallthrough
-						default:
-							break
-						}
-					}
-				}
-			case <-time.After(1 * time.Second):
-				// TODO:
+				ui.ShowMessage(msg)
+			} else {
+				msg := string(buf[1:n])
+				ui.ShowStatus(msg)
 			}
 		}
-	}
+	}()
+
+	myWindow.SetContent(ui_content)
+	myWindow.Canvas().Focus(ui.input)
+	myWindow.ShowAndRun()
+
+	return nil
 }

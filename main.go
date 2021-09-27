@@ -12,19 +12,15 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"log"
-	"runtime"
 )
 
 // TODO: externalize strings
+// TODO: make it multi-room
+
 func main() {
 
 	nl := Newline{}
-
-	if runtime.GOOS == "windows" {
-		nl.SetNewLine("\r\n")
-	} else {
-		nl.SetNewLine("\n")
-	}
+	nl.Init()
 
 	whoami := WhoAmI{}
 
