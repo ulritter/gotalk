@@ -8,7 +8,6 @@ import (
 	"os"
 	"strings"
 
-	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 )
 
@@ -91,7 +90,6 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 
 	myApp := app.NewWithID(APPTITLE)
 	myWindow := myApp.NewWindow(WINTITLE)
-	myWindow.Resize(fyne.NewSize(1200, 800))
 
 	ui := &Ui{win: myWindow}
 	ui_content := ui.makeUi(conn, nl)

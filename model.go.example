@@ -2,6 +2,7 @@ package main
 
 import (
 	"net"
+	"runtime"
 )
 
 const CMD_PREFIX = '/'
@@ -26,14 +27,11 @@ const BUFSIZE = 16384
 //
 
 const serverKey = `-----BEGIN EC PARAMETERS-----
-< some stuff >
 -----END EC PARAMETERS-----
 -----BEGIN EC PRIVATE KEY-----
-< some stuff >
 -----END EC PRIVATE KEY-----
 `
 const rootCert = `-----BEGIN CERTIFICATE-----
-< some stuff >
 -----END CERTIFICATE-----
 `
 

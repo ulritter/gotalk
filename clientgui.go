@@ -1,13 +1,19 @@
 package main
 
 import (
+	"image/color"
 	"net"
 
 	"fyne.io/fyne/v2"
+	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 )
+
+const MAXLINES = 1024
+const APPTITLE = "cooltide"
+const WINTITLE = "gotalk"
 
 type Ui struct {
 	mMsgs   []string
@@ -23,7 +29,6 @@ type Ui struct {
 }
 
 func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
-
 	u.input = widget.NewEntry()
 	u.mLabel = widget.NewLabel("Messages")
 	u.mOutput = widget.NewLabel("")
@@ -32,18 +37,33 @@ func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.sOutput = widget.NewLabel("")
 	u.sScroll = container.NewScroll(u.sOutput)
 
-	u.mScroll.SetMinSize(fyne.NewSize(800, 800))
-	u.sScroll.SetMinSize(fyne.NewSize(400, 800))
+	hline1 := canvas.NewRectangle(color.Gray{})
+	hline1.Resize(fyne.NewSize(800, 3))
+	hline2 := canvas.NewRectangle(color.Gray{})
+	hline2.Resize(fyne.NewSize(400, 3))
+	vline := canvas.NewRectangle(color.Gray{})
+	vline.Resize(fyne.NewSize(3, 400))
 
-	displayArea := container.NewHBox(
-		container.NewVBox(u.mLabel, u.mScroll),
-		layout.NewSpacer(),
-		container.NewVBox(u.sLabel, u.sScroll))
+	u.mScroll.SetMinSize(fyne.NewSize(500, 400))
+	u.sScroll.SetMinSize(fyne.NewSize(400, 440))
+
+	left := container.NewVBox(u.mLabel, u.mScroll, u.input)
+	right := container.NewHBox(vline, container.NewVBox(u.sLabel, u.sScroll))
+	content := container.New(
+		layout.NewBorderLayout(nil, nil, left, right),
+		left,
+		right)
+
+	/* displayArea := container.NewHBox(
+		container.NewVBox(u.mLabel,  u.mScroll),
+		//layout.NewSpacer(),
+		vline,
+		container.NewVBox(u.sLabel,  u.sScroll))
 
 	content := container.New(
 		layout.NewBorderLayout(displayArea, u.input, nil, nil),
 		displayArea,
-		u.input)
+		u.input) */
 
 	u.input.OnSubmitted = func(text string) {
 		processInput(conn, u.input.Text, nl)
@@ -51,7 +71,7 @@ func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 		u.mScroll.ScrollToBottom()
 		u.win.Canvas().Focus(u.input)
 	}
-	return content
+	return container.New(layout.NewMaxLayout(), content)
 }
 
 func (u *Ui) ShowMessage(msg string) {
