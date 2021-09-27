@@ -41,6 +41,8 @@ Server termination by SIGHUP (for the time being)
     ./gotalk client MyNick 127.0.0.1
     ./gotalk client MyNick 127.0.0.1 8089
 
+![Client example](https://github.com/ulritter/gotalk/blob/main/example.png)
+
 Client commands:
 - `/exit` - terminate connection and exit
 - `/list` - displays active users in room
