@@ -27,6 +27,7 @@ type Ui struct {
 	sOutput *widget.Label
 	sScroll *container.Scroll
 	button  *widget.Button
+	ui_ref  *Ui
 }
 
 func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
@@ -37,9 +38,11 @@ func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.sLabel = widget.NewLabel("Status Info")
 	u.sOutput = widget.NewLabel("")
 	u.sScroll = container.NewScroll(u.sOutput)
+	u.ui_ref = u
+
 	u.button = widget.NewButton(">>", func() {
 		if len(u.input.Text) > 0 {
-			processInput(conn, u.input.Text, nl)
+			processInput(conn, u.input.Text, nl, u)
 			u.input.SetText("")
 			u.mScroll.ScrollToBottom()
 			u.win.Canvas().Focus(u.input)
@@ -55,12 +58,12 @@ func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.sScroll.SetMinSize(fyne.NewSize(400, 440))
 
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
-	left := container.NewBorder(container.NewBorder(u.mLabel, nil, nil, nil, u.mScroll), inputline, nil, nil)
+	left := container.NewBorder(u.mLabel, inputline, nil, nil, u.mScroll)
 	right := container.NewBorder(nil, nil, vline, container.NewBorder(u.sLabel, nil, nil, nil, u.sScroll))
-	content := container.NewBorder(nil, nil, left, right)
+	content := container.NewBorder(nil, nil, nil, right, left)
 
 	u.input.OnSubmitted = func(text string) {
-		processInput(conn, u.input.Text, nl)
+		processInput(conn, u.input.Text, nl, u)
 		u.input.SetText("")
 		u.mScroll.ScrollToBottom()
 		u.win.Canvas().Focus(u.input)
@@ -84,6 +87,7 @@ func (u *Ui) ShowMessage(msg string) {
 		outMsg = outMsg + "\n" + u.mMsgs[i]
 	}
 	u.mOutput.SetText(outMsg)
+	u.mScroll.Refresh()
 	u.mScroll.ScrollToBottom()
 }
 
@@ -103,5 +107,6 @@ func (u *Ui) ShowStatus(msg string) {
 		outMsg = outMsg + "\n" + u.sMsgs[i]
 	}
 	u.sOutput.SetText(outMsg)
+	u.sScroll.Refresh()
 	u.sScroll.ScrollToBottom()
 }

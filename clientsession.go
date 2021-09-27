@@ -16,38 +16,54 @@ func sendServerCommand(conn net.Conn, cmd string) error {
 	return err
 }
 
-func printHelp(nl Newline) {
-	// TODO: create help text
-	fmt.Print("Available commands:" + nl.NewLine())
-	fmt.Print("- `/exit` - terminate connection and exit" + nl.NewLine())
-	fmt.Print("- `/list` - displays active users in room" + nl.NewLine())
-	fmt.Print("- `/nick <nickname>` - change nickname" + nl.NewLine())
+func printHelp(nl Newline, u *Ui) {
+
+	u.ShowStatus(nl.NewLine() + "Available commands:" + nl.NewLine() + "===================")
+	u.ShowStatus("  /exit - terminate connection and exit")
+	u.ShowStatus("  /list - displays active users in room")
+	u.ShowStatus("  /nick <nickname> - change nickname")
 }
 
-func printError(nl Newline) {
-	fmt.Print("Command error, type /help of /? for command descriptions" + nl.NewLine())
+func printError(nl Newline, u *Ui) {
+	u.ShowStatus(nl.NewLine() + "Command error," + nl.NewLine() + "type /help of /? for command descriptions")
 }
 
-func parseCommand(conn net.Conn, msg string, nl Newline) int {
+func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 	if msg[0] != CMD_PREFIX {
 		return CODE_NOCMD
 	} else {
 		cmdstring := msg[1:]
 		cmd := strings.Fields(cmdstring)
+		lc := len(cmd)
 		switch cmd[0] {
 		case CMD_EXIT:
-			sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT+string(CMD_ESCAPE_CHAR))
-			return CODE_EXIT
+			if lc == 1 {
+				sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT+string(CMD_ESCAPE_CHAR))
+				return CODE_EXIT
+			} else {
+				printError(nl, u)
+				return CODE_DONOTHING
+			}
 		case CMD_HELP, CMD_HELP1:
-			printHelp(nl)
-			return CODE_DONOTHING
+			if lc == 1 {
+				printHelp(nl, u)
+				return CODE_DONOTHING
+			} else {
+				printError(nl, u)
+				return CODE_DONOTHING
+			}
 		case CMD_LISTUSERS:
-			sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
-			return CODE_DONOTHING
+			if lc == 1 {
+				sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
+				return CODE_DONOTHING
+			} else {
+				printError(nl, u)
+				return CODE_DONOTHING
+			}
 		case CMD_CHANGENICK:
 			cmd_arguments := cmd[1:]
 			if len(cmd_arguments) != 1 {
-				printError(nl)
+				printError(nl, u)
 				return CODE_DONOTHING
 			} else {
 				new_nick := cmd_arguments[0]
@@ -55,6 +71,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline) int {
 				return CODE_DONOTHING
 			}
 		default:
+			printError(nl, u)
 			return CODE_DONOTHING
 		}
 	}
@@ -62,10 +79,10 @@ func parseCommand(conn net.Conn, msg string, nl Newline) int {
 
 // TODO: error handling for whole function
 
-func processInput(conn net.Conn, msg string, nl Newline) error {
+func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 
 	if len(msg) > 0 {
-		switch cC := parseCommand(conn, msg, nl); cC {
+		switch cC := parseCommand(conn, msg, nl, u); cC {
 		case CODE_NOCMD:
 			fmt.Fprintln(conn, msg)
 		case CODE_EXIT:
