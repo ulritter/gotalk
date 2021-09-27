@@ -33,20 +33,17 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 
 	for {
 		n, err := conn.Read(buf)
-		if err != nil {
-			log.Print("Error reading from buffer"+nl.NewLine(), err)
-			return err
-		}
 
-		if buf[0] == CMD_ESCAPE_CHAR {
+		if (buf[0] == CMD_ESCAPE_CHAR) || (err != nil) {
 			pattern := strings.Fields(string(buf[:n]))
-			if (len(pattern) == 1) && (pattern[0] == (CMD_EXIT)) {
+			if (len(pattern) == 1) && (pattern[0] == (CMD_EXIT)) || (err != nil) {
 				log.Printf("End condition, closing connection for %s"+nl.NewLine(), user.name)
 				inputChannel <- ClientInput{
 					user,
 					&UserLeftEvent{user, "Goodbye"},
 				}
-				break
+				return err
+				//break
 			} else if (len(pattern) == 2) && (pattern[0] == (CMD_CHANGENICK)) {
 				inputChannel <- ClientInput{
 					user,
@@ -65,7 +62,6 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 		}
 
 	}
-	return nil
 }
 
 func startServer(eventChannel chan ClientInput, config *tls.Config, port string, nl Newline) error {
@@ -84,7 +80,7 @@ func startServer(eventChannel chan ClientInput, config *tls.Config, port string,
 		}
 		go func() {
 			if err := handleConnection(conn, eventChannel, nl); err != nil {
-				log.Print("Error handling connection"+nl.NewLine(), err)
+				log.Print("Error handling connection or unexpected client exit"+nl.NewLine(), err)
 			}
 		}()
 

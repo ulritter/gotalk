@@ -1,20 +1,12 @@
 # gotalk
 
 ## Simple Multi-user ad-hoc communication program.
-**The communication is secured using tls over tcp. The program can be started in server mode or in client mode (see below)**
+**The communication is secured using tls over tcp. The program can be started in server mode or in client mode (see below). In client mode the program starts a graphical user interface to accomodate both conversations and status messages. The client GUI is built using `fyne` (https://fyne.io/), a portable graphical toolkit.**
 
-Parts of this program are based on the great golang jump-start tutorial by David Byttow:
-https://www.youtube.com/watch?v=oyKrI8e1-9U
-
-https://github.com/davidbyttow
-
-
-Thank you very much!
-
-&NewLine;  
 &NewLine; 
 **Build the software:**
 - install golang
+- install fyne (see also https://developer.fyne.io/index.html)
 - clone / download this repo
 - rename `model.go.example` to `model.go`
 - run `openssl ecparam -genkey -name prime256v1 -out server.key`

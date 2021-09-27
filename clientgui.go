@@ -26,6 +26,7 @@ type Ui struct {
 	sLabel  *widget.Label
 	sOutput *widget.Label
 	sScroll *container.Scroll
+	button  *widget.Button
 }
 
 func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
@@ -36,34 +37,27 @@ func (u *Ui) makeUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.sLabel = widget.NewLabel("Status Info")
 	u.sOutput = widget.NewLabel("")
 	u.sScroll = container.NewScroll(u.sOutput)
+	u.button = widget.NewButton(">>", func() {
+		if len(u.input.Text) > 0 {
+			processInput(conn, u.input.Text, nl)
+			u.input.SetText("")
+			u.mScroll.ScrollToBottom()
+			u.win.Canvas().Focus(u.input)
+		}
+	})
 
-	hline1 := canvas.NewRectangle(color.Gray{})
-	hline1.Resize(fyne.NewSize(800, 3))
-	hline2 := canvas.NewRectangle(color.Gray{})
-	hline2.Resize(fyne.NewSize(400, 3))
+	//TODO: make everything relative to actial wundow size
+
 	vline := canvas.NewRectangle(color.Gray{})
 	vline.Resize(fyne.NewSize(3, 400))
 
 	u.mScroll.SetMinSize(fyne.NewSize(500, 400))
 	u.sScroll.SetMinSize(fyne.NewSize(400, 440))
 
-	left := container.NewVBox(u.mLabel, u.mScroll, u.input)
-	right := container.NewHBox(vline, container.NewVBox(u.sLabel, u.sScroll))
-	content := container.New(
-		layout.NewBorderLayout(nil, nil, left, right),
-		left,
-		right)
-
-	/* displayArea := container.NewHBox(
-		container.NewVBox(u.mLabel,  u.mScroll),
-		//layout.NewSpacer(),
-		vline,
-		container.NewVBox(u.sLabel,  u.sScroll))
-
-	content := container.New(
-		layout.NewBorderLayout(displayArea, u.input, nil, nil),
-		displayArea,
-		u.input) */
+	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
+	left := container.NewBorder(container.NewBorder(u.mLabel, nil, nil, nil, u.mScroll), inputline, nil, nil)
+	right := container.NewBorder(nil, nil, vline, container.NewBorder(u.sLabel, nil, nil, nil, u.sScroll))
+	content := container.NewBorder(nil, nil, left, right)
 
 	u.input.OnSubmitted = func(text string) {
 		processInput(conn, u.input.Text, nl)
