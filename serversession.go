@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func serverDialogHandling(clientInputChannel <-chan ClientInput, nl Newline) {
+func handleServerDialog(clientInputChannel <-chan ClientInput, nl Newline) {
 	room := &Room{}
 	for input := range clientInputChannel {
 		switch event := input.event.(type) {

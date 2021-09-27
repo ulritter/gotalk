@@ -2,10 +2,8 @@ package main
 
 /*
 simple ad-hoc multi user communication program. communication is secured by tls over tcp.
-the program can start in server mode or in client mode.
+the program can start in server mode or in client mode. Client is GUI using fyne.io as a graphics toolkit
 
-Parts of this program are based oh the great golang jump-start tutorial of David Byttow:
-https://www.youtube.com/watch?v=oyKrI8e1-9U
 */
 
 import (

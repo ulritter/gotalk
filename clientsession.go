@@ -97,7 +97,7 @@ func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 	return nil
 }
 
-func clientDialogHandling(connect string, config *tls.Config, nick string, nl Newline) error {
+func handleClientDialog(connect string, config *tls.Config, nick string, nl Newline) error {
 	buf := make([]byte, BUFSIZE)
 	conn, err := tls.Dial("tcp", connect, config)
 	if err != nil {
@@ -109,7 +109,7 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 	myWindow := myApp.NewWindow(WINTITLE)
 
 	ui := &Ui{win: myWindow}
-	ui_content := ui.newUi(conn, nl)
+	content := ui.newUi(conn, nl)
 
 	ui.ShowStatus(fmt.Sprintf("Connected to: %s, Nickname: %s %s", connect, nick, nl.NewLine()))
 
@@ -133,7 +133,7 @@ func clientDialogHandling(connect string, config *tls.Config, nick string, nl Ne
 		}
 	}()
 
-	myWindow.SetContent(ui_content)
+	myWindow.SetContent(content)
 	myWindow.Canvas().Focus(ui.input)
 	myWindow.ShowAndRun()
 
