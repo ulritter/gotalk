@@ -12,6 +12,9 @@ var lang *language.Config
 
 var locale string
 
+const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
+const LANGfILE = "./language.json"
+
 const CMD_PREFIX = '/'
 const CMD_EXIT = "exit"
 const CMD_CHANGENICK = "nick"

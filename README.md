@@ -9,6 +9,8 @@
 - install fyne (see also https://developer.fyne.io/index.html)
 - Linux: on a standard Ubuntu 20.04 distro I had to install:
   `sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama1 libxinerama-dev libxi-dev libxxf86vm-dev`
+- windows:  for 64 bit gcc (if not already installed) get the MinGW-w64 installer on the website below and chose x86_64 architecture during install:
+  `http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download`
 - install localization package: `go get github.com/moemoe89/go-localization`
 - clone / download this repo
 - rename `model.go.example` to `model.go`

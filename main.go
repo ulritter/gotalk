@@ -10,19 +10,13 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"log"
-
-	language "github.com/moemoe89/go-localization"
 )
 
 // TODO: externalize strings
 // TODO: make it multi-room
 
 func init() {
-	cfg := language.New()
-	cfg.BindPath("./language.json")
-	cfg.BindMainLocale("en")
-	var err error
-	lang, err = cfg.Init()
+	err := initLocalization()
 	if err != nil {
 		panic(err)
 	}
