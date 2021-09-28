@@ -7,7 +7,9 @@
 **Build the software:**
 - install golang
 - install fyne (see also https://developer.fyne.io/index.html)
-- install localisation package: `go get github.com/moemoe89/go-localization`
+- Linux: on a standard Ubuntu 20.04 distro I had to install:
+  `sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama1 libxinerama-dev libxi-dev libxxf86vm-dev`
+- install localization package: `go get github.com/moemoe89/go-localization`
 - clone / download this repo
 - rename `model.go.example` to `model.go`
 - run `openssl ecparam -genkey -name prime256v1 -out server.key`

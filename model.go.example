@@ -3,7 +3,7 @@ package main
 import (
 	"net"
 	"runtime"
-	
+
 	language "github.com/moemoe89/go-localization"
 )
 
@@ -26,6 +26,11 @@ const CODE_EXIT = 1
 const CODE_DONOTHING = 2
 
 const BUFSIZE = 16384
+
+const MESSAGEWIDTH = 600
+const MESSAGEHEIGHT = 400
+const STATUSWIDTH = 424
+const STATUSHEIGHT = 440
 
 //
 // hard-wired tls key / certificate for test purposes
