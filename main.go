@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-// TODO: externalize strings
+// TODO: improve command line parameter handling
 // TODO: make it multi-room
 
 func init() {

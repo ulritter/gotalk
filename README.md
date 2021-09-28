@@ -56,5 +56,5 @@ Client commands:
 &NewLine;   
 &NewLine;   
 
-In all cases \<address\> defaults to `localhost` and \<port\> defaults to `8089` and \<nickname\> defaults to `J_Doe`
+In all cases \<address\> defaults to `localhost`, \<port\> defaults to `8089`, and \<nickname\> defaults to `J_Doe`
 
