@@ -32,10 +32,10 @@ type Ui struct {
 
 func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.input = widget.NewEntry()
-	u.mLabel = widget.NewLabel("Messages")
+	u.mLabel = widget.NewLabel(lang.Lookup(locale, "Messages"))
 	u.mOutput = widget.NewLabel("")
 	u.mScroll = container.NewScroll(u.mOutput)
-	u.sLabel = widget.NewLabel("Status Info")
+	u.sLabel = widget.NewLabel(lang.Lookup(locale, "Status Info"))
 	u.sOutput = widget.NewLabel("")
 	u.sScroll = container.NewScroll(u.sOutput)
 	u.ui_ref = u
@@ -52,8 +52,8 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	vline := canvas.NewRectangle(color.Gray{})
 	vline.Resize(fyne.NewSize(3, 400))
 
-	u.mScroll.SetMinSize(fyne.NewSize(500, 400))
-	u.sScroll.SetMinSize(fyne.NewSize(400, 440))
+	u.mScroll.SetMinSize(fyne.NewSize(MESSAGEWIDTH, MESSAGEHEIGHT))
+	u.sScroll.SetMinSize(fyne.NewSize(STATUSWIDTH, STATUSHEIGHT))
 
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
 	left := container.NewBorder(u.mLabel, inputline, nil, nil, u.mScroll)
@@ -61,10 +61,12 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	content := container.NewBorder(nil, nil, nil, right, left)
 
 	u.input.OnSubmitted = func(text string) {
-		processInput(conn, u.input.Text, nl, u)
-		u.input.SetText("")
-		u.mScroll.ScrollToBottom()
-		u.win.Canvas().Focus(u.input)
+		if len(u.input.Text) > 0 {
+			processInput(conn, u.input.Text, nl, u)
+			u.input.SetText("")
+			u.mScroll.ScrollToBottom()
+			u.win.Canvas().Focus(u.input)
+		}
 	}
 	return container.New(layout.NewMaxLayout(), content)
 }

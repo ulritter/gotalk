@@ -10,13 +10,27 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"log"
+
+	language "github.com/moemoe89/go-localization"
 )
 
 // TODO: externalize strings
 // TODO: make it multi-room
 
+func init() {
+	cfg := language.New()
+	cfg.BindPath("./language.json")
+	cfg.BindMainLocale("en")
+	var err error
+	lang, err = cfg.Init()
+	if err != nil {
+		panic(err)
+	}
+}
+
 func main() {
 
+	locale = "de"
 	nl := Newline{}
 	nl.Init()
 
@@ -28,8 +42,7 @@ func main() {
 
 	if getParams == nil {
 		if whoami.server {
-
-			go serverDialogHandling(ch, nl)
+			go handleServerDialog(ch, nl)
 			cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
 			config := &tls.Config{Certificates: []tls.Certificate{cer}}
 			if err != nil {
@@ -43,11 +56,11 @@ func main() {
 			roots := x509.NewCertPool()
 			ok := roots.AppendCertsFromPEM([]byte(rootCert))
 			if !ok {
-				log.Fatal("failed to parse root certificate")
+				log.Fatal(lang.Lookup(locale, "Failed to parse root certificate"))
 			}
 			config := &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
 			connect := whoami.addr + whoami.port
-			clientDialogHandling(connect, config, whoami.nick, nl)
+			handleClientDialog(connect, config, whoami.nick, nl)
 		}
 	}
 }

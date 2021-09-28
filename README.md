@@ -7,6 +7,7 @@
 **Build the software:**
 - install golang
 - install fyne (see also https://developer.fyne.io/index.html)
+- install localisation package: `go get github.com/moemoe89/go-localization`
 - clone / download this repo
 - rename `model.go.example` to `model.go`
 - run `openssl ecparam -genkey -name prime256v1 -out server.key`

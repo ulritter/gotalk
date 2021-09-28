@@ -18,14 +18,14 @@ func sendServerCommand(conn net.Conn, cmd string) error {
 
 func printHelp(nl Newline, u *Ui) {
 
-	u.ShowStatus(nl.NewLine() + "Available commands:" + nl.NewLine() + "===================")
-	u.ShowStatus("  /exit - terminate connection and exit")
-	u.ShowStatus("  /list - displays active users in room")
-	u.ShowStatus("  /nick <nickname> - change nickname")
+	u.ShowStatus(nl.NewLine() + lang.Lookup(locale, "Available commands:") + nl.NewLine() + lang.Lookup(locale, "==================="))
+	u.ShowStatus(lang.Lookup(locale, "  /exit - terminate connection and exit"))
+	u.ShowStatus(lang.Lookup(locale, "  /list - displays active users in room"))
+	u.ShowStatus(lang.Lookup(locale, "  /nick <nickname> - change nickname"))
 }
 
 func printError(nl Newline, u *Ui) {
-	u.ShowStatus(nl.NewLine() + "Command error," + nl.NewLine() + "type /help of /? for command descriptions")
+	u.ShowStatus(nl.NewLine() + lang.Lookup(locale, "Command error,") + nl.NewLine() + lang.Lookup(locale, "type /help of /? for command descriptions"))
 }
 
 func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
@@ -111,7 +111,7 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 	ui := &Ui{win: myWindow}
 	content := ui.newUi(conn, nl)
 
-	ui.ShowStatus(fmt.Sprintf("Connected to: %s, Nickname: %s %s", connect, nick, nl.NewLine()))
+	ui.ShowStatus(fmt.Sprintf(lang.Lookup(locale, "Connected to:")+" %s, "+lang.Lookup(locale, "Nickname:")+" %s %s", connect, nick, nl.NewLine()))
 
 	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR))
 
@@ -119,7 +119,7 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 		for { // TODO: error handling
 			n, err := conn.Read(buf)
 			if err != nil {
-				log.Printf("Error reading from buffer, most likely server was terminated" + nl.NewLine())
+				log.Printf(lang.Lookup(locale, "Error reading from buffer, most likely server was terminated") + nl.NewLine())
 				conn.Close()
 				os.Exit(1)
 			}

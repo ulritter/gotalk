@@ -14,7 +14,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 	session := &Session{conn}
 	n, err := conn.Read(buf)
 	if err != nil {
-		log.Print("Error reading from buffer"+nl.NewLine(), err)
+		log.Print(lang.Lookup(locale, "Error reading from buffer")+nl.NewLine(), err)
 		return err
 	}
 	var nick string
@@ -37,10 +37,10 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 		if (buf[0] == CMD_ESCAPE_CHAR) || (err != nil) {
 			pattern := strings.Fields(string(buf[:n]))
 			if (len(pattern) == 1) && (pattern[0] == (CMD_EXIT)) || (err != nil) {
-				log.Printf("End condition, closing connection for %s"+nl.NewLine(), user.name)
+				log.Printf(lang.Lookup(locale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
 				inputChannel <- ClientInput{
 					user,
-					&UserLeftEvent{user, "Goodbye"},
+					&UserLeftEvent{user, lang.Lookup(locale, "Goodbye")},
 				}
 				return err
 			} else if (len(pattern) == 2) && (pattern[0] == (CMD_CHANGENICK)) {
@@ -64,7 +64,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 }
 
 func startServer(eventChannel chan ClientInput, config *tls.Config, port string, nl Newline) error {
-	log.Printf("Starting server on %s"+nl.NewLine(), port)
+	log.Printf(lang.Lookup(locale, "Starting server on:")+"%s"+nl.NewLine(), port)
 	ln, err := tls.Listen("tcp", port, config)
 	if err != nil {
 		// handle error
@@ -74,12 +74,12 @@ func startServer(eventChannel chan ClientInput, config *tls.Config, port string,
 		conn, err := ln.Accept()
 		if err != nil {
 			// handle error
-			log.Print("Error accepting connection"+nl.NewLine(), err)
+			log.Print(lang.Lookup(locale, "Error accepting connection")+nl.NewLine(), err)
 			continue
 		}
 		go func() {
 			if err := handleConnection(conn, eventChannel, nl); err != nil {
-				log.Print("Error handling connection or unexpected client exit"+nl.NewLine(), err)
+				log.Print(lang.Lookup(locale, "Error handling connection or unexpected client exit")+nl.NewLine(), err)
 			}
 		}()
 
