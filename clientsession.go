@@ -11,23 +11,26 @@ import (
 	"fyne.io/fyne/v2/app"
 )
 
-func sendServerCommand(conn net.Conn, cmd string) error {
-	_, err := fmt.Fprint(conn, cmd)
+// send a string to the server
+func sendToServer(conn net.Conn, str string) error {
+	_, err := fmt.Fprint(conn, str)
 	return err
 }
 
+// display help text in the status are of the window (no server roudtrip required)
 func printHelp(nl Newline, u *Ui) {
-
 	u.ShowStatus(nl.NewLine() + lang.Lookup(locale, "Available commands:") + nl.NewLine() + lang.Lookup(locale, "==================="))
 	u.ShowStatus(lang.Lookup(locale, "  /exit - terminate connection and exit"))
 	u.ShowStatus(lang.Lookup(locale, "  /list - displays active users in room"))
 	u.ShowStatus(lang.Lookup(locale, "  /nick <nickname> - change nickname"))
 }
 
+// display error message in the status are of the window (no server roudtrip required)
 func printError(nl Newline, u *Ui) {
 	u.ShowStatus(nl.NewLine() + lang.Lookup(locale, "Command error,") + nl.NewLine() + lang.Lookup(locale, "type /help of /? for command descriptions"))
 }
 
+//parse given string whether it is a command or not and take respective action
 func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 	if msg[0] != CMD_PREFIX {
 		return CODE_NOCMD
@@ -38,7 +41,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 		switch cmd[0] {
 		case CMD_EXIT:
 			if lc == 1 {
-				sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT+string(CMD_ESCAPE_CHAR))
+				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
 				printError(nl, u)
@@ -54,7 +57,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 			}
 		case CMD_LISTUSERS:
 			if lc == 1 {
-				sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
+				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
 				return CODE_DONOTHING
 			} else {
 				printError(nl, u)
@@ -67,7 +70,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 				return CODE_DONOTHING
 			} else {
 				new_nick := cmd_arguments[0]
-				sendServerCommand(conn, string(CMD_ESCAPE_CHAR)+CMD_CHANGENICK+string(CMD_ESCAPE_CHAR)+new_nick+string(CMD_ESCAPE_CHAR))
+				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_CHANGENICK+string(CMD_ESCAPE_CHAR)+new_nick+string(CMD_ESCAPE_CHAR))
 				return CODE_DONOTHING
 			}
 		default:
@@ -79,12 +82,13 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 
 // TODO: error handling for whole function
 
+// this function is called by ui events and starts to process the user input
 func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 
 	if len(msg) > 0 {
 		switch cC := parseCommand(conn, msg, nl, u); cC {
 		case CODE_NOCMD:
-			fmt.Fprintln(conn, msg)
+			sendToServer(conn, msg+nl.NewLine())
 		case CODE_EXIT:
 			conn.Close()
 			os.Exit(0)
@@ -97,6 +101,9 @@ func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 	return nil
 }
 
+// this function is called by main() in the case the app needs to operate as client
+// it starts the conenction to the server, listens to the server,
+// creates the ui and starts the fyne ui loop
 func handleClientDialog(connect string, config *tls.Config, nick string, nl Newline) error {
 	buf := make([]byte, BUFSIZE)
 	conn, err := tls.Dial("tcp", connect, config)

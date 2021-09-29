@@ -32,7 +32,10 @@
     "===================": "===================",
     "  /exit - terminate connection and exit": "  /exit - terminate connection and exit",
     "  /list - displays active users in room": "  /list - displays active users in room",
-    "  /nick <nickname> - change nickname": "  /nick <nickname> - change nickname"
+    "  /nick <nickname> - change nickname": "  /nick <nickname> - change nickname",
+    "Usage:": "Usage:",
+    "server [<port>] or": "server [<port>] or",
+    "client [<nickname> [<address>] [<port>]]": "client [<nickname> [<address>] [<port>]]"
     },
   "de": {
     "Failed to parse root certificate": "Fehler beim Überprüfen des Root Zertifikate",
@@ -67,6 +70,9 @@
     "===================": "===================",
     "  /exit - terminate connection and exit": "  /exit - verlasse den Raum und beende das Programm",
     "  /list - displays active users in room": "  /list - zeige die aktiven Benutzer im Raum",
-    "  /nick <nickname> - change nickname": "  /nick <Spitzname> - ändere den Spitznamen"
+    "  /nick <nickname> - change nickname": "  /nick <Spitzname> - ändere den Spitznamen",
+    "Usage:": "Aufruf:",
+    "server [<port>] or": "server [<port>] oder",
+    "client [<nickname> [<address>] [<port>]]": "client [<spitzname> [<adresse>] [<port>]]"
     }
 }

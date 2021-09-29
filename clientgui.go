@@ -15,6 +15,7 @@ const MAXLINES = 1024
 const APPTITLE = "cooltide"
 const WINTITLE = "gotalk"
 
+// data strcture to hold the ui elements
 type Ui struct {
 	mMsgs   []string
 	sMsgs   []string
@@ -30,6 +31,7 @@ type Ui struct {
 	ui_ref  *Ui
 }
 
+// create new ui with fyne elements
 func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.input = widget.NewEntry()
 	u.mLabel = widget.NewLabel(lang.Lookup(locale, "Messages"))
@@ -71,6 +73,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	return container.New(layout.NewMaxLayout(), content)
 }
 
+//display a user message in the (left hand) message area of the ui
 func (u *Ui) ShowMessage(msg string) {
 	nlines := len(u.mMsgs)
 	if nlines < MAXLINES {
@@ -91,6 +94,7 @@ func (u *Ui) ShowMessage(msg string) {
 	u.mScroll.ScrollToBottom()
 }
 
+//display a status message in the (right hand) status area of the ui
 func (u *Ui) ShowStatus(msg string) {
 	nlines := len(u.sMsgs)
 	if nlines < MAXLINES {

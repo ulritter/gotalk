@@ -5,10 +5,12 @@ import (
 	"io"
 	"net/http"
 	"os"
+	"runtime"
 
 	language "github.com/moemoe89/go-localization"
 )
 
+// Initialize localization environment, if localization file is not present, create one by downloading it from github
 func initLocalization() error {
 	if !fileExists(LANGFILE) {
 		fileUrl := RAWFILE
@@ -28,6 +30,7 @@ func initLocalization() error {
 	return err
 }
 
+// check if a file exists
 func fileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
@@ -36,6 +39,7 @@ func fileExists(filename string) bool {
 	return !info.IsDir()
 }
 
+// download a file from github (raw format)
 func GetFileFromGithub(filepath string, url string) error {
 	resp, err := http.Get(url)
 	if err != nil {
@@ -51,11 +55,13 @@ func GetFileFromGithub(filepath string, url string) error {
 	return err
 }
 
+// print usage message in case of wrong parameters given
 func printUsage(appname string) {
-	fmt.Printf("Usage: %s server [<port>] or\n", appname)
-	fmt.Printf("Usage: %s client [<nickname> [<address>] [<port>]] \n", appname)
+	fmt.Printf(lang.Lookup(locale, "Usage:"+"%s "+lang.Lookup(locale, "server [<port>] or")+"\n"), appname)
+	fmt.Printf(lang.Lookup(locale, "Usage:"+"%s "+lang.Lookup(locale, "client [<nickname> [<address>] [<port>]]")+"\n"), appname)
 }
 
+// parse command line arguments
 func checkArgs(whoami *WhoAmI) error {
 	// TODO: beautify parameter handling
 
@@ -102,4 +108,13 @@ func checkArgs(whoami *WhoAmI) error {
 		whoami.port = ":" + whoami.port
 	}
 	return nil
+}
+
+// set newline representation for wither linux or windows systems
+func (n *Newline) Init() {
+	if runtime.GOOS == "windows" {
+		n.nl = "\r\n"
+	} else {
+		n.nl = "\n"
+	}
 }

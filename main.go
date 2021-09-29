@@ -15,6 +15,7 @@ import (
 // TODO: improve command line parameter handling
 // TODO: make it multi-room
 
+// init localization environment
 func init() {
 	err := initLocalization()
 	if err != nil {

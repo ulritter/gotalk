@@ -13,7 +13,7 @@
   `http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download`
 - install localization package: `go get github.com/moemoe89/go-localization`
 - clone / download this repo
-- rename `model.go.example` to `model.go`
+- rename `secret.go.example` to `secret.go`
 - run `openssl ecparam -genkey -name prime256v1 -out server.key`
 - replace `serverKey` constant dummy content with content of `server.key` file
 - run `openssl req -new -x509 -key server.key -out server.pem -days 3650`

@@ -8,6 +8,7 @@ import (
 	"time"
 )
 
+// read from connection, recognize request types and pass appropriate event types to the session handler (serverDialog())
 func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) error {
 	buf := make([]byte, BUFSIZE)
 
@@ -63,6 +64,8 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 	}
 }
 
+// this function is called by main() in the case the app needs to operate as server
+// wait for connections and start a handler for each connection
 func startServer(eventChannel chan ClientInput, config *tls.Config, port string, nl Newline) error {
 	log.Printf(lang.Lookup(locale, "Starting server on:")+"%s"+nl.NewLine(), port)
 	ln, err := tls.Listen("tcp", port, config)

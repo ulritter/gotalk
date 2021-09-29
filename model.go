@@ -2,7 +2,6 @@ package main
 
 import (
 	"net"
-	"runtime"
 
 	language "github.com/moemoe89/go-localization"
 )
@@ -34,58 +33,56 @@ const MESSAGEHEIGHT = 400
 const STATUSWIDTH = 424
 const STATUSHEIGHT = 440
 
-//
-// hard-wired tls key / certificate for test purposes
-// command for serverKey: openssl ecparam -genkey -name prime256v1 -out server.key
-// command for root Cert: openssl req -new -x509 -key server.key -out server.pem -days 3650
-//
-
-const serverKey = `-----BEGIN EC PARAMETERS-----
-
------END EC PARAMETERS-----
------BEGIN EC PRIVATE KEY-----
-
------END EC PRIVATE KEY-----
-`
-const rootCert = `-----BEGIN CERTIFICATE-----
-`
-
+// Event type for messages
 type MessageEvent struct {
 	msg string
 }
 
+// Event type for users joining
 type UserJoinedEvent struct {
 }
 
+// Event type for users leaving
 type UserLeftEvent struct {
 	user *User
 	msg  string
 }
 
+// Event type for users changing their nick
 type UserChangedNickEvent struct {
 	user *User
 	nick string
 }
 
+// Event type for users requesting a room user list
 type ListUsersEvent struct {
 	user *User
 }
 
+// Commmunication structure between connection handler and user session
 type ClientInput struct {
 	user  *User
 	event interface{}
 }
 
+// User Info
 type User struct {
 	name       string
 	session    *Session
 	timejoined string
 }
 
+// Structure holding the connection for the session
 type Session struct {
 	conn net.Conn
 }
 
+// Structure holding the users the room
+type Room struct {
+	users []*User
+}
+
+// Structure holding the command line parameters (are filled with defaults on startup)
 type WhoAmI struct {
 	server bool
 	addr   string
@@ -93,31 +90,25 @@ type WhoAmI struct {
 	nick   string
 }
 
-type Room struct {
-	users []*User
-}
-
+// Holding new line flavours for either linux or windows type systems
 type Newline struct {
 	nl string
 }
 
+//sends a message string from server to client
 func (s *Session) WriteString(str string) error {
 	_, err := s.conn.Write([]byte(str))
 	return err
 }
+
+//sends a status string from server to client
 func (s *Session) WriteStatus(str string) error {
 	str = string(CMD_ESCAPE_CHAR) + str
 	_, err := s.conn.Write([]byte(str))
 	return err
 }
+
+//returns newline character for either linux or windows type systems
 func (n *Newline) NewLine() string {
 	return n.nl
-}
-
-func (n *Newline) Init() {
-	if runtime.GOOS == "windows" {
-		n.nl = "\r\n"
-	} else {
-		n.nl = "\n"
-	}
 }
