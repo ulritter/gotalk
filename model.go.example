@@ -9,11 +9,10 @@ import (
 
 var lang *language.Config
 
-
 var locale string
 
 const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
-const LANGfILE = "./language.json"
+const LANGFILE = "./language.json"
 
 const CMD_PREFIX = '/'
 const CMD_EXIT = "exit"
@@ -42,12 +41,13 @@ const STATUSHEIGHT = 440
 //
 
 const serverKey = `-----BEGIN EC PARAMETERS-----
+
 -----END EC PARAMETERS-----
 -----BEGIN EC PRIVATE KEY-----
+
 -----END EC PRIVATE KEY-----
 `
 const rootCert = `-----BEGIN CERTIFICATE-----
------END CERTIFICATE-----
 `
 
 type MessageEvent struct {
