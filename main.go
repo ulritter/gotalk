@@ -24,7 +24,7 @@ func init() {
 
 func main() {
 
-	locale = "de"
+	locale = "en"
 	nl := Newline{}
 	nl.Init()
 
