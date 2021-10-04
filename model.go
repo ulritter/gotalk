@@ -28,11 +28,6 @@ const CODE_DONOTHING = 2
 
 const BUFSIZE = 16384
 
-const MESSAGEWIDTH = 600
-const MESSAGEHEIGHT = 400
-const STATUSWIDTH = 424
-const STATUSHEIGHT = 440
-
 // Event type for messages
 type MessageEvent struct {
 	msg string

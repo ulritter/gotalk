@@ -23,7 +23,8 @@ func handleServerDialog(clientInputChannel <-chan ClientInput, nl Newline) {
 			input.user.session.WriteStatus(fmt.Sprintf(lang.Lookup(locale, "Welcome")+" %s", input.user.name))
 			for _, user := range room.users {
 				if user != input.user {
-					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"%s "+lang.Lookup(locale, "entered the room"), input.user.name))
+					user.session.WriteStatus(" ")
+					user.session.WriteStatus(fmt.Sprintf("%s ", input.user.name) + lang.Lookup(locale, "entered the room"))
 				}
 			}
 		case *UserLeftEvent:
@@ -31,26 +32,32 @@ func handleServerDialog(clientInputChannel <-chan ClientInput, nl Newline) {
 			var users []*User
 			for _, user := range room.users {
 				if user != input.user {
-					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"%s "+lang.Lookup(locale, "left the room"), input.user.name))
+					user.session.WriteStatus(" ")
+					user.session.WriteStatus(fmt.Sprintf("%s "+lang.Lookup(locale, "left the room"), input.user.name))
 					users = append(users, user)
 				}
 			}
 			room.users = users
 
 		case *UserChangedNickEvent:
-			log.Printf(lang.Lookup(locale, "User")+" %s "+lang.Lookup(locale, "has changed his nick to:")+" %s"+nl.NewLine(), event.user.name, event.nick)
+			log.Printf(lang.Lookup(locale, "User")+" %s "+lang.Lookup(locale, "has changed his nick to:")+" %s", event.user.name, event.nick)
 			for _, user := range room.users {
 				if user != input.user {
-					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+"[%s] "+lang.Lookup(locale, "has changed his nick to:")+" [%s]", event.user.name, event.nick))
+					user.session.WriteStatus(" ")
+					user.session.WriteStatus(fmt.Sprintf("[%s] "+lang.Lookup(locale, "has changed his nick to:")+" [%s]", event.user.name, event.nick))
 
 				} else {
-					user.session.WriteStatus(fmt.Sprintf(nl.NewLine()+lang.Lookup(locale, "You have changed your nick\nfrom")+" [%s] "+lang.Lookup(locale, "to")+" [%s]", event.user.name, event.nick))
+					user.session.WriteStatus(" ")
+					user.session.WriteStatus(lang.Lookup(locale, "You have changed your nick"))
+					user.session.WriteStatus(fmt.Sprintf(lang.Lookup(locale, "from")+" [%s] "+lang.Lookup(locale, "to")+" [%s]", event.user.name, event.nick))
 				}
 			}
 			input.user.name = event.nick
 		case *ListUsersEvent:
-			log.Printf(lang.Lookup(locale, "User")+" %s "+lang.Lookup(locale, "has requested user list")+nl.NewLine(), input.user.name)
-			input.user.session.WriteStatus(nl.NewLine() + lang.Lookup(locale, "User list:") + nl.NewLine() + lang.Lookup(locale, "=========="))
+			log.Printf(lang.Lookup(locale, "User")+" %s "+lang.Lookup(locale, "has requested user list"), input.user.name)
+			input.user.session.WriteStatus(" ")
+			input.user.session.WriteStatus(lang.Lookup(locale, "User list:"))
+			input.user.session.WriteStatus(lang.Lookup(locale, "=========="))
 
 			for _, user := range room.users {
 				input.user.session.WriteStatus(fmt.Sprintf("[%s] - "+lang.Lookup(locale, "joined at")+" [%s]", user.name, user.timejoined))

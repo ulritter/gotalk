@@ -19,15 +19,20 @@ func sendToServer(conn net.Conn, str string) error {
 
 // display help text in the status are of the window (no server roudtrip required)
 func printHelp(nl Newline, u *Ui) {
-	u.ShowStatus(nl.NewLine() + lang.Lookup(locale, "Available commands:") + nl.NewLine() + lang.Lookup(locale, "==================="))
+	u.ShowStatus(" ")
+	u.ShowStatus(lang.Lookup(locale, "Available commands:"))
+	u.ShowStatus(lang.Lookup(locale, "==================="))
 	u.ShowStatus(lang.Lookup(locale, "  /exit - terminate connection and exit"))
 	u.ShowStatus(lang.Lookup(locale, "  /list - displays active users in room"))
 	u.ShowStatus(lang.Lookup(locale, "  /nick <nickname> - change nickname"))
+	u.ShowStatus(lang.Lookup(locale, "  /help /?  - this list"))
 }
 
 // display error message in the status are of the window (no server roudtrip required)
 func printError(nl Newline, u *Ui) {
-	u.ShowStatus(nl.NewLine() + lang.Lookup(locale, "Command error,") + nl.NewLine() + lang.Lookup(locale, "type /help of /? for command descriptions"))
+	u.ShowStatus(" ")
+	u.ShowStatus(lang.Lookup(locale, "Command error,"))
+	u.ShowStatus(lang.Lookup(locale, "type /help of /? for command descriptions"))
 }
 
 //parse given string whether it is a command or not and take respective action
@@ -91,6 +96,7 @@ func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 			sendToServer(conn, msg+nl.NewLine())
 		case CODE_EXIT:
 			conn.Close()
+			u.win.Close()
 			os.Exit(0)
 		case CODE_DONOTHING:
 			fallthrough
@@ -115,10 +121,11 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 	myApp := app.NewWithID(APPTITLE)
 	myWindow := myApp.NewWindow(WINTITLE)
 
-	ui := &Ui{win: myWindow}
-	content := ui.newUi(conn, nl)
+	u := &Ui{win: myWindow}
+	content := u.newUi(conn, nl)
 
-	ui.ShowStatus(fmt.Sprintf(lang.Lookup(locale, "Connected to:")+" %s, "+lang.Lookup(locale, "Nickname:")+" %s %s", connect, nick, nl.NewLine()))
+	u.ShowStatus(fmt.Sprintf(lang.Lookup(locale, "Connected to:")+" %s, "+lang.Lookup(locale, "Nickname:")+" %s", connect, nick))
+	u.ShowStatus(" ")
 
 	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR))
 
@@ -128,20 +135,21 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 			if err != nil {
 				log.Printf(lang.Lookup(locale, "Error reading from buffer, most likely server was terminated") + nl.NewLine())
 				conn.Close()
+				u.win.Close()
 				os.Exit(1)
 			}
 			if buf[0] != CMD_ESCAPE_CHAR {
 				msg := string(buf[:n])
-				ui.ShowMessage(msg)
+				u.ShowMessage(msg)
 			} else {
 				msg := string(buf[1:n])
-				ui.ShowStatus(msg)
+				u.ShowStatus(msg)
 			}
 		}
 	}()
 
 	myWindow.SetContent(content)
-	myWindow.Canvas().Focus(ui.input)
+	myWindow.Canvas().Focus(u.input)
 	myWindow.ShowAndRun()
 
 	return nil
