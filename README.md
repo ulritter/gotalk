@@ -51,7 +51,7 @@ Server termination by SIGHUP (for the time being)
 &NewLine;   
 
 **Client commands:**
-- `/exit` - terminate connection and exit
+- ,`/exit`,`/quit`,`/q` - close connection and exit
 - `/list` - displays active users in room
 - `/nick <nickname>` - change nickname
 
@@ -59,6 +59,7 @@ Server termination by SIGHUP (for the time being)
 &NewLine;   
 
 **Color controls:**
+
   General:
   - a color control followed by space will change the color for the rest of the line
   - a color control attached to a word will change the color for the word
