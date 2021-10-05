@@ -12,7 +12,7 @@ import (
 	"log"
 )
 
-// TODO: improve command line parameter handling
+// TODO: improve command line parameter handling, use map for parser
 // TODO: make it multi-room
 
 // init localization environment

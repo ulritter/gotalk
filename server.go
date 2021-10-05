@@ -37,7 +37,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 
 		if (buf[0] == CMD_ESCAPE_CHAR) || (err != nil) {
 			pattern := strings.Fields(string(buf[:n]))
-			if (len(pattern) == 1) && (pattern[0] == (CMD_EXIT)) || (err != nil) {
+			if (len(pattern) == 1) && ((pattern[0] == (CMD_EXIT1)) || (pattern[0] == (CMD_EXIT2)) || (pattern[0] == (CMD_EXIT3))) || (err != nil) {
 				log.Printf(lang.Lookup(locale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
 				inputChannel <- ClientInput{
 					user,

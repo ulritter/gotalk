@@ -14,7 +14,9 @@ const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language
 const LANGFILE = "./language.json"
 
 const CMD_PREFIX = '/'
-const CMD_EXIT = "exit"
+const CMD_EXIT1 = "exit"
+const CMD_EXIT2 = "quit"
+const CMD_EXIT3 = "q"
 const CMD_CHANGENICK = "nick"
 const CMD_LISTUSERS = "list"
 const CMD_ERROR = "error"
@@ -91,7 +93,7 @@ type Newline struct {
 }
 
 //sends a message string from server to client
-func (s *Session) WriteString(str string) error {
+func (s *Session) WriteMessage(str string) error {
 	_, err := s.conn.Write([]byte(str))
 	return err
 }

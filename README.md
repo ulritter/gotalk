@@ -48,13 +48,31 @@ Server termination by SIGHUP (for the time being)
 
 ![Client example](https://github.com/ulritter/gotalk/blob/main/example.png)
 
-Client commands:
+&NewLine;   
+
+**Client commands:**
 - `/exit` - terminate connection and exit
 - `/list` - displays active users in room
 - `/nick <nickname>` - change nickname
 
 &NewLine;   
 &NewLine;   
+
+**Color controls:**
+  General:
+  - a color control followed by space will change the color for the rest of the line
+  - a color control attached to a word will change the color for the word
+ 
+ Usage Example:
+`$red` this is my `$y`text
+ 
+Color Controls (long form and short form for each control)
+`$red $r $cyan $c $yellow $y $green $g`
+`$purple $p $white $w $black $b` 
+
+&NewLine;
+&NewLine;   
+
 
 In all cases \<address\> defaults to `localhost`, \<port\> defaults to `8089`, and \<nickname\> defaults to `J_Doe`
 

@@ -15,7 +15,7 @@ func handleServerDialog(clientInputChannel <-chan ClientInput, nl Newline) {
 			currentTime := time.Now()
 			log.Printf(lang.Lookup(locale, "Received Message at")+" %s "+lang.Lookup(locale, "from")+" [%s]: %s"+nl.NewLine(), currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
 			for _, user := range room.users {
-				user.session.WriteString(fmt.Sprintf("[%s]: %s", input.user.name, event.msg))
+				user.session.WriteMessage(fmt.Sprintf("[%s]: %s", input.user.name, event.msg))
 			}
 		case *UserJoinedEvent:
 			log.Print("User joined: "+nl.NewLine(), input.user.name)

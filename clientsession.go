@@ -21,11 +21,24 @@ func sendToServer(conn net.Conn, str string) error {
 func printHelp(nl Newline, u *Ui) {
 	u.ShowStatus(" ")
 	u.ShowStatus(lang.Lookup(locale, "Available commands:"))
-	u.ShowStatus(lang.Lookup(locale, "==================="))
-	u.ShowStatus(lang.Lookup(locale, "  /exit - terminate connection and exit"))
+	u.ShowStatus(lang.Lookup(locale, "  /exit, /quit, /q - terminate connection and exit"))
 	u.ShowStatus(lang.Lookup(locale, "  /list - displays active users in room"))
 	u.ShowStatus(lang.Lookup(locale, "  /nick <nickname> - change nickname"))
-	u.ShowStatus(lang.Lookup(locale, "  /help /?  - this list"))
+	u.ShowStatus(lang.Lookup(locale, "  /help, /?  - this list"))
+	u.ShowStatus(" ")
+	u.ShowStatus(lang.Lookup(locale, "Available color controls:"))
+	u.ShowStatus(lang.Lookup(locale, "General:"))
+	u.ShowStatus(lang.Lookup(locale, "A color control followed by space will change"))
+	u.ShowStatus(lang.Lookup(locale, "the color for the remainder of the line."))
+	u.ShowStatus(lang.Lookup(locale, "A color control attached to a word will change"))
+	u.ShowStatus(lang.Lookup(locale, "the color for the word."))
+	u.ShowStatus(lang.Lookup(locale, " "))
+	u.ShowStatus(lang.Lookup(locale, "Usage Example:"))
+	u.ShowStatus(lang.Lookup(locale, "$red this is my $ytext"))
+	u.ShowStatus(lang.Lookup(locale, " "))
+	u.ShowStatus(lang.Lookup(locale, "Color Controls: (long form and short form):"))
+	u.ShowStatus(lang.Lookup(locale, "$red $r $cyan $c $yellow $y $green $g"))
+	u.ShowStatus(lang.Lookup(locale, "$purple $p $white $w $black $b "))
 }
 
 // display error message in the status are of the window (no server roudtrip required)
@@ -44,9 +57,25 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 		cmd := strings.Fields(cmdstring)
 		lc := len(cmd)
 		switch cmd[0] {
-		case CMD_EXIT:
+		case CMD_EXIT1:
 			if lc == 1 {
-				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT+string(CMD_ESCAPE_CHAR))
+				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
+				return CODE_EXIT
+			} else {
+				printError(nl, u)
+				return CODE_DONOTHING
+			}
+		case CMD_EXIT2:
+			if lc == 1 {
+				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
+				return CODE_EXIT
+			} else {
+				printError(nl, u)
+				return CODE_DONOTHING
+			}
+		case CMD_EXIT3:
+			if lc == 1 {
+				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
 				printError(nl, u)
@@ -119,9 +148,10 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 	}
 
 	myApp := app.NewWithID(APPTITLE)
+	setColors(myApp)
 	myWindow := myApp.NewWindow(WINTITLE)
 
-	u := &Ui{win: myWindow}
+	u := &Ui{win: myWindow, app: myApp}
 	content := u.newUi(conn, nl)
 
 	u.ShowStatus(fmt.Sprintf(lang.Lookup(locale, "Connected to:")+" %s, "+lang.Lookup(locale, "Nickname:")+" %s", connect, nick))
