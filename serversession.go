@@ -57,7 +57,6 @@ func handleServerDialog(clientInputChannel <-chan ClientInput, nl Newline) {
 			log.Printf(lang.Lookup(locale, "User")+" %s "+lang.Lookup(locale, "has requested user list"), input.user.name)
 			input.user.session.WriteStatus(" ")
 			input.user.session.WriteStatus(lang.Lookup(locale, "User list:"))
-			input.user.session.WriteStatus(lang.Lookup(locale, "=========="))
 
 			for _, user := range room.users {
 				input.user.session.WriteStatus(fmt.Sprintf("[%s] - "+lang.Lookup(locale, "joined at")+" [%s]", user.name, user.timejoined))
