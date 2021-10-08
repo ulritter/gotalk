@@ -37,7 +37,7 @@ func main() {
 
 	if getParams == nil {
 		if whoami.server {
-			go handleServerDialog(ch, nl)
+			go handleServerSession(ch, nl)
 			cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
 			config := &tls.Config{Certificates: []tls.Certificate{cer}}
 			if err != nil {
@@ -55,7 +55,7 @@ func main() {
 			}
 			config := &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
 			connect := whoami.addr + whoami.port
-			handleClientDialog(connect, config, whoami.nick, nl)
+			handleClientSession(connect, config, whoami.nick, nl)
 		}
 	}
 }

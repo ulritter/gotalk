@@ -234,7 +234,7 @@ func (u *Ui) ShowMessage(msg string, test bool) {
 	u.mBox.Refresh()
 	u.mScroll.Refresh()
 	u.mScroll.ScrollToBottom()
-	if test == false {
+	if !test {
 		u.win.Canvas().Focus(u.input)
 	}
 }
@@ -247,7 +247,7 @@ func (u *Ui) ShowStatus(msg string, test bool) {
 	u.sBox.Refresh()
 	u.sScroll.Refresh()
 	u.sScroll.ScrollToBottom()
-	if test == false {
+	if !test {
 		u.win.Canvas().Focus(u.input)
 	}
 }

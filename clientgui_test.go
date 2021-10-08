@@ -1,36 +1,10 @@
 package main
 
 import (
-	"net"
-	"runtime"
 	"testing"
 
 	"fyne.io/fyne/v2"
-	"fyne.io/fyne/v2/app"
 )
-
-var testApp fyne.App
-var testWindow fyne.Window
-var testUi *Ui
-var testConn net.Conn
-var testNl Newline
-
-func testNlInit(t *testing.T) {
-	if runtime.GOOS == "windows" {
-		testNl.nl = "\r\n"
-	} else {
-		testNl.nl = "\n"
-	}
-}
-
-func testUiSetUp(t *testing.T) {
-
-	testNlInit(t)
-	testApp = app.NewWithID(APPTITLE)
-	setColors(testApp)
-	testWindow = testApp.NewWindow(WINTITLE)
-	testUi = &Ui{win: testWindow, app: testApp}
-}
 
 /*
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
@@ -41,7 +15,6 @@ func testUiSetUp(t *testing.T) {
 */
 func TestUiLayout(t *testing.T) {
 
-	testUiSetUp(t)
 	test_content := testUi.newUi(testConn, testNl)
 	o := test_content.(*fyne.Container).Objects
 	if len(o) != 1 {

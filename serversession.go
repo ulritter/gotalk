@@ -7,7 +7,7 @@ import (
 )
 
 // dialog handling, broadcast user input to all users and status messages to all users or to a specific user depending on the request type
-func handleServerDialog(clientInputChannel <-chan ClientInput, nl Newline) {
+func handleServerSession(clientInputChannel <-chan ClientInput, nl Newline) {
 	room := &Room{}
 	for input := range clientInputChannel {
 		switch event := input.event.(type) {
