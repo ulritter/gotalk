@@ -144,7 +144,8 @@ type Ui struct {
 	app     fyne.App
 }
 
-// create new ui with fyne elements
+//create new ui structure with fyne elements and
+//set the callbacks
 func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 
 	actTheme = u.app.Settings().ThemeVariant()
@@ -213,15 +214,15 @@ func (u *Ui) ShowMessage(msg string, test bool) {
 	mWords := strings.Fields(msg)
 	mb := container.NewHBox()
 
-	// fill horizontal box
+	// fill horizontal box making up the message line
 	for i := range mWords {
 		w := mWords[i]
 		if w[0] == '$' {
-			c, m, coloronly := checkColor(w)
+			returnColor, inputWord, coloronly := checkColor(w)
 			if coloronly {
-				linecolor = *c
+				linecolor = *returnColor
 			} else {
-				t := canvas.NewText(m, *c)
+				t := canvas.NewText(inputWord, *returnColor)
 				t.TextStyle = linestyle
 				mb.Add(t)
 			}
@@ -254,22 +255,25 @@ func (u *Ui) ShowStatus(msg string, test bool) {
 	}
 }
 
-func refreshVBoxContent(msg string, m *[]MessageLine, b *fyne.Container, h *fyne.Container) {
-	nlines := len((*m))
-	t := MessageLine{
+//append new message / container to existing message slice / container
+//if both message slice and container exceed MAXLINES, remove the oldest message / container
+//and append the new one at the bottom
+func refreshVBoxContent(msg string, messageLine *[]MessageLine, targetContainer *fyne.Container, newContainer *fyne.Container) {
+	nlines := len((*messageLine))
+	bufferLine := MessageLine{
 		txt: msg,
-		obj: h,
+		obj: newContainer,
 	}
 	if nlines < MAXLINES {
-		(*m) = append((*m), t)
-		(*b).Add(t.obj)
+		(*messageLine) = append((*messageLine), bufferLine)
+		(*targetContainer).Add(bufferLine.obj)
 	} else {
 		for i := 0; i < nlines-1; i++ {
-			(*m)[i] = (*m)[i+1]
-			(*b).Objects[i] = (*b).Objects[i+1]
+			(*messageLine)[i] = (*messageLine)[i+1]
+			(*targetContainer).Objects[i] = (*targetContainer).Objects[i+1]
 		}
-		(*m)[nlines-1] = t
-		(*b).Objects[nlines-1] = t.obj
+		(*messageLine)[nlines-1] = bufferLine
+		(*targetContainer).Objects[nlines-1] = bufferLine.obj
 	}
 }
 
@@ -279,32 +283,32 @@ func refreshVBoxContent(msg string, m *[]MessageLine, b *fyne.Container, h *fyne
 //the new string and an indicator whether the string only consisted
 //of only the color code or whether color code was anly precededing
 //a message element
-func checkColor(w string) (*color.RGBA, string, bool) {
+func checkColor(returnString string) (*color.RGBA, string, bool) {
 
-	var c *color.RGBA
-	var co bool
-	c = &MESSAGECOLOR
-	//unfortunately golang randomly interates on maps
+	var returnColor *color.RGBA
+	var coloronly bool
+	returnColor = &MESSAGECOLOR
+	//unfortunately golang randomly iterates on maps,
 	//thus we have to circle throug an outer loop so that we
 	//can check on the key strings in descending length
 	for i := 7; i > 1; i-- {
-		for key, element := range cmap {
-			if element.len == i {
-				if (len(w) == element.len) && (w == key) {
-					co = true
-					c = &element.color
-					w = ""
-					return c, w, co
+		for colorKey, colorcode := range cmap {
+			if colorcode.len == i {
+				if (len(returnString) == colorcode.len) && (returnString == colorKey) {
+					coloronly = true
+					returnColor = &colorcode.color
+					returnString = ""
+					return returnColor, returnString, coloronly
 				} else {
-					if (len(w) > element.len) && (w[:element.len] == key) {
-						co = false
-						c = &element.color
-						w = w[element.len:]
-						return c, w, co
+					if (len(returnString) > colorcode.len) && (returnString[:colorcode.len] == colorKey) {
+						coloronly = false
+						returnColor = &colorcode.color
+						returnString = returnString[colorcode.len:]
+						return returnColor, returnString, coloronly
 					}
 				}
 			}
 		}
 	}
-	return c, w, co
+	return returnColor, returnString, coloronly
 }
