@@ -26,11 +26,17 @@
 &NewLine;  
 
 **Run the software in server mode:**
+(watch the underscore)
 
-	gotalk server [<port>] 
+    gotalk_server [<port>] (in case of serveronly binary)
+
+    gotalk server [<port>] (in case of server/client binary)
 
 **Examples:**
 
+    
+    ./gotalk_server
+    ./gotalk_server 8089
     ./gotalk server
     ./gotalk server 8089
 
