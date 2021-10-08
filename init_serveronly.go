@@ -1,8 +1,12 @@
+// +build serveronly
+
 package main
 
 import (
+	"crypto/tls"
 	"fmt"
 	"io"
+	"log"
 	"net/http"
 	"os"
 	"runtime"
@@ -57,48 +61,25 @@ func GetFileFromGithub(filepath string, url string) error {
 
 // print usage message in case of wrong parameters given
 func printUsage(appname string) {
-	fmt.Printf(lang.Lookup(locale, "Usage:"+"%s "+lang.Lookup(locale, "server [<port>] or")+"\n"), appname)
-	fmt.Printf(lang.Lookup(locale, "Usage:"+"%s "+lang.Lookup(locale, "client [<nickname> [<address>] [<port>]]")+"\n"), appname)
+	fmt.Printf(lang.Lookup(locale, "Usage:")+" %s  [<port>]+\n", appname)
 }
 
 // parse command line arguments
 func checkArgs(whoami *WhoAmI) error {
-	// TODO: beautify parameter handling
 
-	whoami.server = false
+	whoami.server = true
 	whoami.addr = "localhost"
 	whoami.port = ":8089"
 	whoami.nick = "J_Doe"
 
 	arguments := os.Args
 	if len(arguments) == 1 {
+		return nil
+	} else if len(arguments) == 2 {
+		whoami.port = arguments[1]
+	} else if len(arguments) > 2 {
 		printUsage(arguments[0])
-		// TODO: error handling
 		return fmt.Errorf("parameter error")
-	} else if arguments[1] == "client" {
-		whoami.server = false
-		if len(arguments) >= 3 {
-			whoami.nick = arguments[2]
-			if len(arguments) >= 4 {
-				whoami.addr = arguments[3]
-			}
-			if len(arguments) == 5 {
-				whoami.port = arguments[4]
-			} else {
-				printUsage(arguments[0])
-				// TODO: error handling
-				return fmt.Errorf("parameter error")
-			}
-		}
-	} else if arguments[1] == "server" {
-		whoami.server = true
-		if len(arguments) == 3 {
-			whoami.port = arguments[2]
-		} else if len(arguments) > 3 {
-			printUsage(arguments[0])
-			// TODO: error handling
-			return fmt.Errorf("parameter error")
-		}
 	} else {
 		printUsage(arguments[0])
 		// TODO: error handling
@@ -116,5 +97,30 @@ func (n *Newline) Init() {
 		n.nl = "\r\n"
 	} else {
 		n.nl = "\n"
+	}
+}
+
+func get_going() {
+	locale = "en"
+	nl := Newline{}
+	nl.Init()
+
+	whoami := WhoAmI{}
+
+	getParams := checkArgs(&whoami)
+
+	ch := make(chan ClientInput)
+
+	if getParams == nil {
+		go handleServerSession(ch, nl)
+		cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
+		config := &tls.Config{Certificates: []tls.Certificate{cer}}
+		if err != nil {
+			log.Fatal(err)
+		}
+		err = startServer(ch, config, whoami.port, nl)
+		if err != nil {
+			log.Fatal(err)
+		}
 	}
 }

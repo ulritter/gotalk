@@ -1,3 +1,5 @@
+// +build !serveronly
+
 package main
 
 import (
