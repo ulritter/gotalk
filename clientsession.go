@@ -18,34 +18,34 @@ func sendToServer(conn net.Conn, str string) error {
 }
 
 // display help text in the status are of the window (no server roudtrip required)
-func printHelp(nl Newline, u *Ui) {
-	u.ShowStatus(" ")
-	u.ShowStatus(lang.Lookup(locale, "Available commands:"))
-	u.ShowStatus(lang.Lookup(locale, "  /exit, /quit, /q - terminate connection and exit"))
-	u.ShowStatus(lang.Lookup(locale, "  /list - displays active users in room"))
-	u.ShowStatus(lang.Lookup(locale, "  /nick <nickname> - change nickname"))
-	u.ShowStatus(lang.Lookup(locale, "  /help, /?  - this list"))
-	u.ShowStatus(" ")
-	u.ShowStatus(lang.Lookup(locale, "Available color controls:"))
-	u.ShowStatus(lang.Lookup(locale, "General:"))
-	u.ShowStatus(lang.Lookup(locale, "A color control followed by space will change"))
-	u.ShowStatus(lang.Lookup(locale, "the color for the remainder of the line."))
-	u.ShowStatus(lang.Lookup(locale, "A color control attached to a word will change"))
-	u.ShowStatus(lang.Lookup(locale, "the color for the word."))
-	u.ShowStatus(lang.Lookup(locale, " "))
-	u.ShowStatus(lang.Lookup(locale, "Usage Example:"))
-	u.ShowStatus(lang.Lookup(locale, "$red this is my $ytext"))
-	u.ShowStatus(lang.Lookup(locale, " "))
-	u.ShowStatus(lang.Lookup(locale, "Color Controls: (long form and short form):"))
-	u.ShowStatus(lang.Lookup(locale, "$red $r $cyan $c $yellow $y $green $g"))
-	u.ShowStatus(lang.Lookup(locale, "$purple $p $white $w $black $b "))
+func showHelp(nl Newline, u *Ui) {
+	u.ShowStatus(" ", false)
+	u.ShowStatus(lang.Lookup(locale, "Available commands:"), false)
+	u.ShowStatus(lang.Lookup(locale, "  /exit, /quit, /q - terminate connection and exit"), false)
+	u.ShowStatus(lang.Lookup(locale, "  /list - displays active users in room"), false)
+	u.ShowStatus(lang.Lookup(locale, "  /nick <nickname> - change nickname"), false)
+	u.ShowStatus(lang.Lookup(locale, "  /help, /?  - this list"), false)
+	u.ShowStatus(" ", false)
+	u.ShowStatus(lang.Lookup(locale, "Available color controls:"), false)
+	u.ShowStatus(lang.Lookup(locale, "General:"), false)
+	u.ShowStatus(lang.Lookup(locale, "A color control followed by space will change"), false)
+	u.ShowStatus(lang.Lookup(locale, "the color for the remainder of the line."), false)
+	u.ShowStatus(lang.Lookup(locale, "A color control attached to a word will change"), false)
+	u.ShowStatus(lang.Lookup(locale, "the color for the word."), false)
+	u.ShowStatus(lang.Lookup(locale, " "), false)
+	u.ShowStatus(lang.Lookup(locale, "Usage Example:"), false)
+	u.ShowStatus(lang.Lookup(locale, "$red this is my $ytext"), false)
+	u.ShowStatus(lang.Lookup(locale, " "), false)
+	u.ShowStatus(lang.Lookup(locale, "Color Controls: (long form and short form):"), false)
+	u.ShowStatus(lang.Lookup(locale, "$red $r $cyan $c $yellow $y $green $g"), false)
+	u.ShowStatus(lang.Lookup(locale, "$purple $p $white $w $black $b "), false)
 }
 
 // display error message in the status are of the window (no server roudtrip required)
-func printError(nl Newline, u *Ui) {
-	u.ShowStatus(" ")
-	u.ShowStatus(lang.Lookup(locale, "Command error,"))
-	u.ShowStatus(lang.Lookup(locale, "type /help of /? for command descriptions"))
+func showError(nl Newline, u *Ui) {
+	u.ShowStatus(" ", false)
+	u.ShowStatus(lang.Lookup(locale, "Command error,"), false)
+	u.ShowStatus(lang.Lookup(locale, "type /help of /? for command descriptions"), false)
 }
 
 //parse given string whether it is a command or not and take respective action
@@ -62,7 +62,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
-				printError(nl, u)
+				showError(nl, u)
 				return CODE_DONOTHING
 			}
 		case CMD_EXIT2:
@@ -70,7 +70,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
-				printError(nl, u)
+				showError(nl, u)
 				return CODE_DONOTHING
 			}
 		case CMD_EXIT3:
@@ -78,15 +78,15 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
-				printError(nl, u)
+				showError(nl, u)
 				return CODE_DONOTHING
 			}
 		case CMD_HELP, CMD_HELP1:
 			if lc == 1 {
-				printHelp(nl, u)
+				showHelp(nl, u)
 				return CODE_DONOTHING
 			} else {
-				printError(nl, u)
+				showError(nl, u)
 				return CODE_DONOTHING
 			}
 		case CMD_LISTUSERS:
@@ -94,13 +94,13 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
 				return CODE_DONOTHING
 			} else {
-				printError(nl, u)
+				showError(nl, u)
 				return CODE_DONOTHING
 			}
 		case CMD_CHANGENICK:
 			cmd_arguments := cmd[1:]
 			if len(cmd_arguments) != 1 {
-				printError(nl, u)
+				showError(nl, u)
 				return CODE_DONOTHING
 			} else {
 				new_nick := cmd_arguments[0]
@@ -108,7 +108,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui) int {
 				return CODE_DONOTHING
 			}
 		default:
-			printError(nl, u)
+			showError(nl, u)
 			return CODE_DONOTHING
 		}
 	}
@@ -154,8 +154,8 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 	u := &Ui{win: myWindow, app: myApp}
 	content := u.newUi(conn, nl)
 
-	u.ShowStatus(fmt.Sprintf(lang.Lookup(locale, "Connected to:")+" %s, "+lang.Lookup(locale, "Nickname:")+" %s", connect, nick))
-	u.ShowStatus(" ")
+	u.ShowStatus(fmt.Sprintf(lang.Lookup(locale, "Connected to:")+" %s, "+lang.Lookup(locale, "Nickname:")+" %s", connect, nick), false)
+	u.ShowStatus(" ", false)
 
 	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR))
 
@@ -170,10 +170,10 @@ func handleClientDialog(connect string, config *tls.Config, nick string, nl Newl
 			}
 			if buf[0] != CMD_ESCAPE_CHAR {
 				msg := string(buf[:n])
-				u.ShowMessage(msg)
+				u.ShowMessage(msg, false)
 			} else {
 				msg := string(buf[1:n])
-				u.ShowStatus(msg)
+				u.ShowStatus(msg, false)
 			}
 		}
 	}()
