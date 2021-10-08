@@ -204,7 +204,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 //display a user message in the (left hand) message area of the ui
 //check for inline color commands and populate the horizontal box
 //according to requested color values
-func (u *Ui) ShowMessage(msg string) {
+func (u *Ui) ShowMessage(msg string, test bool) {
 	linecolor := MESSAGECOLOR
 	linestyle := MESSAGESTYLE
 
@@ -234,18 +234,22 @@ func (u *Ui) ShowMessage(msg string) {
 	u.mBox.Refresh()
 	u.mScroll.Refresh()
 	u.mScroll.ScrollToBottom()
-	u.win.Canvas().Focus(u.input)
+	if test == false {
+		u.win.Canvas().Focus(u.input)
+	}
 }
 
 //display a status message in the (right hand) status area of the ui
-func (u *Ui) ShowStatus(msg string) {
+func (u *Ui) ShowStatus(msg string, test bool) {
 	b := canvas.NewText(msg, STATUSCOLOR)
 	b.TextStyle = STATUSSTYLE
 	refreshVBoxContent(msg, &u.sMsgs, u.sBox, container.NewHBox(b))
 	u.sBox.Refresh()
 	u.sScroll.Refresh()
 	u.sScroll.ScrollToBottom()
-	u.win.Canvas().Focus(u.input)
+	if test == false {
+		u.win.Canvas().Focus(u.input)
+	}
 }
 
 func refreshVBoxContent(msg string, m *[]MessageLine, b *fyne.Container, h *fyne.Container) {
