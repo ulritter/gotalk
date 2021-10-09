@@ -19,16 +19,16 @@
 - run `openssl req -new -x509 -key server.key -out server.pem -days 3650`
 - replace `rootCert` constant dummy content with content of `server.pem` file
 - run `go build -o gotalk` to build a binary containing both server and client functionality
-- run `go build -tags "serveronly" -o gotalk_server` to build a binary containing only server functionality
+- run `go build -tags "serveronly" -o gotalk-server` to build a binary containing only server functionality
 
 
 &NewLine;  
 &NewLine;  
 
 **Run the software in server mode:**
-(watch the underscore)
+(watch the hyphen for the server-only version)
 
-    gotalk_server [<port>] (in case of serveronly binary)
+    gotalk-server [<port>] (in case of serveronly binary)
 
     gotalk server [<port>] (in case of server/client binary)
 

@@ -1,4 +1,4 @@
-// +build !serveronly
+//go:build !serveronly
 
 package main
 
@@ -40,6 +40,8 @@ type Colorfield struct {
 	len   int
 }
 
+//to add new colors, just add 'em here and they
+//will be automatically both recognized and processed
 var cmap_light = map[string]Colorfield{
 	"$cyan":   {color.RGBA{20, 150, 220, 255}, 5},
 	"$c":      {color.RGBA{20, 150, 220, 255}, 2},
@@ -124,6 +126,7 @@ func setColors(a fyne.App) {
 type MessageLine struct {
 	txt string
 	obj *fyne.Container
+	//for future use
 	sty fyne.TextStyle
 }
 
@@ -290,7 +293,10 @@ func checkColor(returnString string) (*color.RGBA, string, bool) {
 	returnColor = &MESSAGECOLOR
 	//unfortunately golang randomly iterates on maps,
 	//thus we have to circle throug an outer loop so that we
-	//can check on the key strings in descending length
+	//can check on the key strings in descending length.
+	//While this might look clumsy, we can now add any new color
+	//to the map definition(s) and it will be automatically
+	//recignized
 	for i := 7; i > 1; i-- {
 		for colorKey, colorcode := range cmap {
 			if colorcode.len == i {

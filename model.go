@@ -28,7 +28,7 @@ const CODE_NOCMD = 0
 const CODE_EXIT = 1
 const CODE_DONOTHING = 2
 
-const BUFSIZE = 16384
+const BUFSIZE = 4096
 
 // Event type for messages
 type MessageEvent struct {

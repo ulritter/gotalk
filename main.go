@@ -9,14 +9,6 @@ the program can start in server mode or in client mode. Client is GUI using fyne
 // TODO: improve command line parameter handling, use map for parser
 // TODO: make it multi-room
 
-// init localization environment
-func init() {
-	err := initLocalization()
-	if err != nil {
-		panic(err)
-	}
-}
-
 func main() {
 	get_going()
 }

@@ -1,4 +1,4 @@
-// +build !serveronly
+//go:build !serveronly
 
 package main
 
