@@ -28,30 +28,46 @@
 **Run the software in server mode:**
 (watch the hyphen for the server-only version)
 
-    gotalk-server [<port>] (in case of serveronly binary)
+    gotalk-server [options] (in case of serveronly binary)
 
-    gotalk server [<port>] (in case of server/client binary)
+    gotalk server [options] (in case of server/client binary)
+
+    Usage: gotalk server
+
+    Flags:
+        -h, --help           Show context-sensitive help.
+        -p, --port="8089"    Port number.
+        -l, --locale="en"    Language setting to be used.
 
 **Examples:**
 
     
-    ./gotalk_server
-    ./gotalk_server 8089
-    ./gotalk server
-    ./gotalk server 8089
+    ./gotalk-server 
+    ./gotalk-server -p 8089 --locale=de
+    ./gotalk server - de
+    ./gotalk server --port=8089
 
 Server termination by SIGHUP (for the time being)
 
 **Run the software in client mode:**
 
-	gotalk client [<nickname> [<address>] [<port>]]
+	gotalk client [options]
+
+    Usage: gotalk client
+
+    Flags:
+        -h, --help                   Show context-sensitive help.
+        -a, --address="localhost"    IP address or domain name.
+        -p, --port="8089"            Port number.
+        -n, --nick="J_Doe"           Nickname to be used.
+        -l, --locale="en"            Language setting to be used.
 
 **Examples:**
 
     ./gotalk client
-    ./gotalk client MyNick
-    ./gotalk client MyNick 127.0.0.1
-    ./gotalk client MyNick 127.0.0.1 8089
+    ./gotalk client --nick MyNick 
+    ./gotalk client -n MyNick --address=127.0.0.1
+    ./gotalk client --nick=MyNick -a 127.0.0.1 --port 8089
 
 ![Client example](https://github.com/ulritter/gotalk/blob/main/example.png)
 

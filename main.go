@@ -10,5 +10,6 @@ the program can start in server mode or in client mode. Client is GUI using fyne
 // TODO: make it multi-room
 
 func main() {
+	locale = "en"
 	get_going()
 }

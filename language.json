@@ -3,7 +3,7 @@
     "Failed to parse root certificate": "Failed to parse root certificate",
     "Error handling connection or unexpected client exit": "Error handling connection or unexpected client exit",
     "Error accepting connection": "Error accepting connection",
-    "Starting server on:": "Starting server on:",
+    "Starting server on port ": "Starting server on port ",
     "Goodbye": "Goodbye",
     "End condition, closing connection for:": "End condition, closing connection for:",
     "Error reading from buffer": "Error reading from buffer",
@@ -46,15 +46,16 @@
     "$red this is my $ytext": "$red this is my $ytext",
     "Color Controls: (long form and short form):": "Color Controls: (long form and short form):",
     "$red $r $cyan $c $yellow $y $green $g": "$red $r $cyan $c $yellow $y $green $g",
-    "$purple $p $white $w $black $b ": "$purple $p $white $w $black $b "
+    "$purple $p $white $w $black $b ": "$purple $p $white $w $black $b ",
+    "Error in port number": "Error in port number"
     },
   "de": {
     "Failed to parse root certificate": "Fehler beim Überprüfen des Root Zertifikate",
     "Error handling connection or unexpected client exit": "Verbindungsfehler oder Client wurde unerwartet beendet",
     "Error accepting connection": "Fehler beim Verbindungsaufbau",
-    "Starting server on:": "Starte Server auf:",
+    "Starting server on port ": "Starte Server auf Port ",
     "Goodbye": "Auf Wiedersehen",
-    "End condition, closing connection for:": "Abbruch-Sedingung, Verbindung wird beendet für",
+    "End condition, closing connection for:": "Abbruchs-Bedingung, Verbindung wird beendet für",
     "Error reading from buffer": "Fehler bei Lesen des Puffers",
     "joined at": "ist beigetreten um",
     "User list:": "Benutzerliste:",
@@ -94,6 +95,7 @@
     "$red this is my $ytext": "$red Dies ist mein $yText",
     "Color Controls: (long form and short form):": "Farbbefehle (lange und kurze Form):",
     "$red $r $cyan $c $yellow $y $green $g": "$red $r $cyan $c $yellow $y $green $g",
-    "$purple $p $white $w $black $b ": "$purple $p $white $w $black $b "
+    "$purple $p $white $w $black $b ": "$purple $p $white $w $black $b ", 
+    "Error in port number": "Fehlerhafte Portnummer"
     }
 }

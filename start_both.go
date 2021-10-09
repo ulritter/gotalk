@@ -7,76 +7,62 @@ import (
 	"crypto/x509"
 	"fmt"
 	"log"
-	"os"
+
+	"github.com/alecthomas/kong"
 )
 
-// print usage message in case of wrong parameters given
-func printUsage(appname string) {
-	fmt.Printf(lang.Lookup(locale, "Usage:"+"%s "+lang.Lookup(locale, "server [<port>] or")+"\n"), appname)
-	fmt.Printf(lang.Lookup(locale, "Usage:"+"%s "+lang.Lookup(locale, "client [<nickname> [<address>] [<port>]]")+"\n"), appname)
-}
+var cli struct {
+	Client struct {
+		Address string `help:"IP address or domain name." short:"a" default:"localhost"`
+		Port    string `help:"Port number." short:"p" default:"8089"`
+		Nick    string `help:"Nickname to be used." short:"n" default:"J_Doe"`
+		Locale  string `help:"Language setting to be used." short:"l" default:"en"`
+	} `cmd:"" help:"Start gotalk client."`
 
-// parse command line arguments
-func checkArgs(whoami *WhoAmI) error {
-	// TODO: beautify parameter handling
-
-	whoami.server = false
-	whoami.addr = "localhost"
-	whoami.port = ":8089"
-	whoami.nick = "J_Doe"
-
-	arguments := os.Args
-	if len(arguments) == 1 {
-		printUsage(arguments[0])
-		// TODO: error handling
-		return fmt.Errorf("parameter error")
-	} else if arguments[1] == "client" {
-		whoami.server = false
-		if len(arguments) >= 3 {
-			whoami.nick = arguments[2]
-			if len(arguments) >= 4 {
-				whoami.addr = arguments[3]
-			}
-			if len(arguments) == 5 {
-				whoami.port = arguments[4]
-			} else {
-				printUsage(arguments[0])
-				// TODO: error handling
-				return fmt.Errorf("parameter error")
-			}
-		}
-	} else if arguments[1] == "server" {
-		whoami.server = true
-		if len(arguments) == 3 {
-			whoami.port = arguments[2]
-		} else if len(arguments) > 3 {
-			printUsage(arguments[0])
-			// TODO: error handling
-			return fmt.Errorf("parameter error")
-		}
-	} else {
-		printUsage(arguments[0])
-		// TODO: error handling
-		return fmt.Errorf("parameter error")
-	}
-	if whoami.port[0] != ':' {
-		whoami.port = ":" + whoami.port
-	}
-	return nil
+	Server struct {
+		Port   string `help:"Port number." short:"p" default:"8089"`
+		Locale string `help:"Language setting to be used." short:"l" default:"en"`
+	} `cmd:"" help:"Start gotalk server."`
 }
 
 func get_going() {
-	locale = "en"
+
 	nl := Newline{}
 	nl.Init()
 
 	whoami := WhoAmI{}
 
-	getParams := checkArgs(&whoami)
+	ctx := kong.Parse(&cli,
+		kong.Name("gotalk"),
+		kong.Description("An instant chat server and client."),
+		kong.UsageOnError(),
+		kong.ConfigureHelp(kong.HelpOptions{
+			Compact: true,
+			Summary: true,
+		}))
+	switch ctx.Command() {
 
-	ch := make(chan ClientInput)
+	case "client":
+		whoami.server = false
+		whoami.addr = cli.Client.Address
+		whoami.port = cli.Client.Port
+		whoami.nick = cli.Client.Nick
+		locale = cli.Client.Locale
 
-	if getParams == nil {
+	case "server":
+		whoami.server = true
+		whoami.port = cli.Server.Port
+		locale = cli.Server.Locale
+	}
+
+	if portOK(whoami.port) {
+
+		if whoami.port[0] != ':' {
+			whoami.port = ":" + whoami.port
+		}
+
+		ch := make(chan ClientInput)
+
 		if whoami.server {
 			go handleServerSession(ch, nl)
 			cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
@@ -98,5 +84,7 @@ func get_going() {
 			connect := whoami.addr + whoami.port
 			handleClientSession(connect, config, whoami.nick, nl)
 		}
+	} else {
+		fmt.Println(lang.Lookup(locale, "Error in port number"))
 	}
 }

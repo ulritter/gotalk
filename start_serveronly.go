@@ -5,54 +5,44 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"github.com/alecthomas/kong"
 	"log"
-	"os"
 )
 
-// print usage message in case of wrong parameters given
-func printUsage(appname string) {
-	fmt.Printf(lang.Lookup(locale, "Usage:")+" %s  [<port>]+\n", appname)
-}
-
-// parse command line arguments
-func checkArgs(whoami *WhoAmI) error {
-
-	whoami.server = true
-	whoami.addr = "localhost"
-	whoami.port = ":8089"
-	whoami.nick = "J_Doe"
-
-	arguments := os.Args
-	if len(arguments) == 1 {
-		return nil
-	} else if len(arguments) == 2 {
-		whoami.port = arguments[1]
-	} else if len(arguments) > 2 {
-		printUsage(arguments[0])
-		return fmt.Errorf("parameter error")
-	} else {
-		printUsage(arguments[0])
-		// TODO: error handling
-		return fmt.Errorf("parameter error")
-	}
-	if whoami.port[0] != ':' {
-		whoami.port = ":" + whoami.port
-	}
-	return nil
+var cli struct {
+	Port   string `help:"Port number." short:"p" default:"8089"`
+	Locale string `help:"Language setting to be used." short:"l" default:"en"`
 }
 
 func get_going() {
-	locale = "en"
+
 	nl := Newline{}
 	nl.Init()
 
 	whoami := WhoAmI{}
 
-	getParams := checkArgs(&whoami)
+	kong.Parse(&cli,
+		kong.Name("gotalk-server"),
+		kong.Description("An instant chat server."),
+		kong.UsageOnError(),
+		kong.ConfigureHelp(kong.HelpOptions{
+			Compact: true,
+			Summary: true,
+		}))
 
-	ch := make(chan ClientInput)
+	whoami.server = true
+	whoami.port = cli.Port
+	locale = cli.Locale
 
-	if getParams == nil {
+	if portOK(whoami.port) {
+		if whoami.port[0] != ':' {
+			whoami.port = ":" + whoami.port
+		}
+
+		locale = cli.Locale
+
+		ch := make(chan ClientInput)
+
 		go handleServerSession(ch, nl)
 		cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
 		config := &tls.Config{Certificates: []tls.Certificate{cer}}
@@ -63,5 +53,7 @@ func get_going() {
 		if err != nil {
 			log.Fatal(err)
 		}
+	} else {
+		fmt.Println(lang.Lookup(locale, "Error in port number"))
 	}
 }

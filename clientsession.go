@@ -126,7 +126,7 @@ func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 		case CODE_NOCMD:
 			sendToServer(conn, msg+nl.NewLine())
 		case CODE_EXIT:
-			conn.Close()
+			fmt.Println(lang.Lookup(locale, "Goodbye"))
 			u.win.Close()
 			os.Exit(0)
 		case CODE_DONOTHING:
@@ -181,7 +181,7 @@ func handleClientSession(connect string, config *tls.Config, nick string, nl New
 	}()
 
 	myWindow.SetContent(content)
-	myWindow.Canvas().Focus(u.input)
+	//myWindow.Canvas().Focus(u.input)
 	myWindow.ShowAndRun()
 
 	return nil

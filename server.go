@@ -67,7 +67,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 // this function is called by main() in the case the app needs to operate as server
 // wait for connections and start a handler for each connection
 func startServer(eventChannel chan ClientInput, config *tls.Config, port string, nl Newline) error {
-	log.Printf(lang.Lookup(locale, "Starting server on:")+"%s"+nl.NewLine(), port)
+	log.Printf(lang.Lookup(locale, "Starting server on port ")+"%s"+nl.NewLine(), port)
 	ln, err := tls.Listen("tcp", port, config)
 	if err != nil {
 		// handle error

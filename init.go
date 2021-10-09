@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 
 	language "github.com/moemoe89/go-localization"
 )
@@ -69,4 +70,19 @@ func (n *Newline) Init() {
 	} else {
 		n.nl = "\n"
 	}
+}
+
+func portOK(p string) bool {
+
+	if p[0] == ':' && len(p) > 1 {
+		p = p[1:]
+	}
+	if len(p) >= 1 {
+		if _, err := strconv.Atoi(p); err == nil {
+			return true
+		}
+	} else {
+		return false
+	}
+	return false
 }

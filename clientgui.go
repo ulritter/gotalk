@@ -182,7 +182,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 		}
 		u.mScroll.Refresh()
 		u.mScroll.ScrollToBottom()
-		u.win.Canvas().Focus(u.input)
+		//u.win.Canvas().Focus(u.input)
 	})
 
 	u.input.OnSubmitted = func(text string) {
@@ -196,7 +196,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 		}
 		u.mScroll.Refresh()
 		u.mScroll.ScrollToBottom()
-		u.win.Canvas().Focus(u.input)
+		//u.win.Canvas().Focus(u.input)
 	}
 
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
