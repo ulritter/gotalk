@@ -22,6 +22,7 @@ const CMD_LISTUSERS = "list"
 const CMD_ERROR = "error"
 const CMD_HELP = "help"
 const CMD_HELP1 = "?"
+const CMD_REVCHECK = "rev"
 const CMD_ESCAPE_CHAR = '\f'
 
 const CODE_NOCMD = 0
@@ -29,6 +30,8 @@ const CODE_EXIT = 1
 const CODE_DONOTHING = 2
 
 const BUFSIZE = 4096
+
+const REVISION = "0.8.1"
 
 // Event type for messages
 type MessageEvent struct {

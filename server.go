@@ -2,6 +2,7 @@ package main
 
 import (
 	"crypto/tls"
+	"fmt"
 	"log"
 	"net"
 	"strings"
@@ -19,8 +20,21 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 		return err
 	}
 	var nick string
-	pattern := string(buf[:n])
-	if (pattern[0] == CMD_ESCAPE_CHAR) && (pattern[n-1] == CMD_ESCAPE_CHAR) {
+
+	rawData := string(buf[:n])
+	rawDataFields := strings.Fields(rawData)
+
+	if len(rawDataFields) != 2 {
+		return fmt.Errorf(lang.Lookup(actualLocale, "Wrong connection initialization message."))
+	} else if rawDataFields[1] != REVISION {
+		str := string(CMD_ESCAPE_CHAR) + string(CMD_ESCAPE_CHAR) + REVISION
+		conn.Write([]byte(str))
+		return fmt.Errorf(lang.Lookup(actualLocale, "Connection request from ")+conn.RemoteAddr().(*net.TCPAddr).IP.String()+lang.Lookup(actualLocale, " rejected. ")+lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", REVISION, rawDataFields[1])
+	}
+
+	assumedNick := rawDataFields[0]
+
+	if (assumedNick[0] == CMD_ESCAPE_CHAR) && (assumedNick[n-1] == CMD_ESCAPE_CHAR) {
 		nick = string(buf[1 : n-1])
 	} else {
 		nick = "J_Doe"

@@ -47,7 +47,12 @@
     "Color Controls: (long form and short form):": "Color Controls: (long form and short form):",
     "$red $r $cyan $c $yellow $y $green $g": "$red $r $cyan $c $yellow $y $green $g",
     "$purple $p $white $w $black $b ": "$purple $p $white $w $black $b ",
-    "Error in port number": "Error in port number"
+    "Error in port number": "Error in port number",
+    "Wrong connection initialization message.": "Wrong connection initialization message.",
+    "Connection request from ": "Connection request from ",
+    " rejected. ":" rejected. ",
+    "Wrong client revision level. Should be: ":"Wrong client revision level. Should be: ",
+    ", actual: ": ", aktuell: "
     },
   "de": {
     "Failed to parse root certificate": "Fehler beim Überprüfen des Root Zertifikate",
@@ -97,6 +102,11 @@
     "Color Controls: (long form and short form):": "Farbbefehle (lange und kurze Form):",
     "$red $r $cyan $c $yellow $y $green $g": "$red $r $cyan $c $yellow $y $green $g",
     "$purple $p $white $w $black $b ": "$purple $p $white $w $black $b ", 
-    "Error in port number": "Fehlerhafte Portnummer"
+    "Error in port number": "Fehlerhafte Portnummer",
+    "Wrong connection initialization message.": "Falsche Initialisierungsnachricht für Verbindung.",
+    "Connection request from ": "Verbindungsversuch von ",
+    " rejected. ":" abgeleht. ",
+    "Wrong client revision level. Should be: ":"Falscher Client Revisions-Level. Sollte sein: ",
+    ", actual: ": ", aktuell: "
     }
 }

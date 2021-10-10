@@ -157,7 +157,8 @@ func handleClientSession(connect string, config *tls.Config, nick string, nl New
 	u := &Ui{win: myWindow, app: myApp}
 	content := u.newUi(conn, nl)
 
-	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR))
+	//send user nick and revision level
+	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR)+" "+REVISION)
 
 	go func() {
 		for { // TODO: error handling
@@ -172,8 +173,17 @@ func handleClientSession(connect string, config *tls.Config, nick string, nl New
 				msg := string(buf[:n])
 				u.ShowMessage(msg)
 			} else {
-				msg := string(buf[1:n])
-				u.ShowStatus(msg)
+				if n > 1 && buf[1] == CMD_ESCAPE_CHAR {
+					//2 escape characters means wrong revision level
+					expectedRevision := string(buf[2:])
+					log.Printf(lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", expectedRevision, REVISION)
+					conn.Close()
+					u.win.Close()
+					os.Exit(1)
+				} else {
+					msg := string(buf[1:n])
+					u.ShowStatus(msg)
+				}
 			}
 		}
 	}()
