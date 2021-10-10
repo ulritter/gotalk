@@ -42,7 +42,7 @@ func TestUiLayout(t *testing.T) {
 
 func TestMessage(t *testing.T) {
 	for i := 0; i < MAXLINES+1; i++ {
-		testUi.ShowMessage("test message", true)
+		testUi.ShowMessage("test message")
 	}
 	if len(testUi.mMsgs) != MAXLINES ||
 		len(testUi.mBox.Objects) != MAXLINES {
@@ -53,7 +53,7 @@ func TestMessage(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	for i := 0; i < MAXLINES+1; i++ {
-		testUi.ShowStatus("test status", true)
+		testUi.ShowStatus("test status")
 	}
 	if len(testUi.sMsgs) != MAXLINES ||
 		len(testUi.sBox.Objects) != MAXLINES {

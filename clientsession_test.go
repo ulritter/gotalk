@@ -38,7 +38,7 @@ func TestClientSession(t *testing.T) {
 
 	codes := [5]parse_test{{CODE_NOCMD, "Test"}, {CODE_EXIT, "/" + CMD_EXIT1}, {CODE_EXIT, "/" + CMD_EXIT2}, {CODE_EXIT, "/" + CMD_EXIT3}, {CODE_DONOTHING, "/Test"}}
 	for i := range codes {
-		p := parseCommand(client, codes[i].str, testUi, true)
+		p := parseCommand(client, codes[i].str, testUi)
 		if p != codes[i].code {
 			t.Logf("parseCommand expected %d, got %d\n", codes[i].code, p)
 			t.Fail()

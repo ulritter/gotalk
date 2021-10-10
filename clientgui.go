@@ -211,7 +211,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 //display a user message in the (left hand) message area of the ui
 //check for inline color commands and populate the horizontal box
 //according to requested color values
-func (u *Ui) ShowMessage(msg string, test bool) {
+func (u *Ui) ShowMessage(msg string) {
 	linecolor := MESSAGECOLOR
 	linestyle := MESSAGESTYLE
 
@@ -241,22 +241,18 @@ func (u *Ui) ShowMessage(msg string, test bool) {
 	u.mBox.Refresh()
 	u.mScroll.Refresh()
 	u.mScroll.ScrollToBottom()
-	if !test {
-		u.win.Canvas().Focus(u.input)
-	}
+	u.win.Canvas().Focus(u.input)
 }
 
 //display a status message in the (right hand) status area of the ui
-func (u *Ui) ShowStatus(msg string, test bool) {
+func (u *Ui) ShowStatus(msg string) {
 	b := canvas.NewText(msg, STATUSCOLOR)
 	b.TextStyle = STATUSSTYLE
 	refreshVBoxContent(msg, &u.sMsgs, u.sBox, container.NewHBox(b))
 	u.sBox.Refresh()
 	u.sScroll.Refresh()
 	u.sScroll.ScrollToBottom()
-	if !test {
-		u.win.Canvas().Focus(u.input)
-	}
+	u.win.Canvas().Focus(u.input)
 }
 
 //append new message / container to existing message slice / container
@@ -292,8 +288,8 @@ func checkColor(returnString string) (*color.RGBA, string, bool) {
 	var returnColor *color.RGBA
 	var coloronly bool
 	returnColor = &MESSAGECOLOR
-	//unfortunately golang randomly iterates on maps,
-	//thus we have to circle throug an outer loop so that we
+	//since golang randomly iterates on maps,
+	//we have to circle through an outer loop so that we
 	//can check on the key strings in descending length.
 	//While this might look clumsy, we can now add any new color
 	//to the map definition(s) and it will be automatically
