@@ -11,7 +11,7 @@ import (
 
 var cli struct {
 	Port   string `help:"Port number." short:"p" default:"8089"`
-	Locale string `help:"Language setting to be used." short:"l" default:"en"`
+	Locale string `help:"Language setting to be used." short:"l" `
 }
 
 func get_going() {
@@ -32,14 +32,15 @@ func get_going() {
 
 	whoami.server = true
 	whoami.port = cli.Port
-	locale = cli.Locale
+
+	if len(cli.Locale) > 0 {
+		actualLocale = cli.Locale
+	}
 
 	if portOK(whoami.port) {
 		if whoami.port[0] != ':' {
 			whoami.port = ":" + whoami.port
 		}
-
-		locale = cli.Locale
 
 		ch := make(chan ClientInput)
 
@@ -54,6 +55,6 @@ func get_going() {
 			log.Fatal(err)
 		}
 	} else {
-		fmt.Println(lang.Lookup(locale, "Error in port number"))
+		fmt.Println(lang.Lookup(actualLocale, "Error in port number"))
 	}
 }

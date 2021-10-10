@@ -16,7 +16,7 @@ var cli struct {
 		Address string `help:"IP address or domain name." short:"a" default:"localhost"`
 		Port    string `help:"Port number." short:"p" default:"8089"`
 		Nick    string `help:"Nickname to be used." short:"n" default:"J_Doe"`
-		Locale  string `help:"Language setting to be used." short:"l" default:"en"`
+		Locale  string `help:"Language setting to be used." short:"l" `
 	} `cmd:"" help:"Start gotalk client."`
 
 	Server struct {
@@ -47,12 +47,16 @@ func get_going() {
 		whoami.addr = cli.Client.Address
 		whoami.port = cli.Client.Port
 		whoami.nick = cli.Client.Nick
-		locale = cli.Client.Locale
+		if len(cli.Client.Locale) > 0 {
+			actualLocale = cli.Client.Locale
+		}
 
 	case "server":
 		whoami.server = true
 		whoami.port = cli.Server.Port
-		locale = cli.Server.Locale
+		if len(cli.Server.Locale) > 0 {
+			actualLocale = cli.Client.Locale
+		}
 	}
 
 	if portOK(whoami.port) {
@@ -78,13 +82,13 @@ func get_going() {
 			roots := x509.NewCertPool()
 			ok := roots.AppendCertsFromPEM([]byte(rootCert))
 			if !ok {
-				log.Fatal(lang.Lookup(locale, "Failed to parse root certificate"))
+				log.Fatal(lang.Lookup(actualLocale, "Failed to parse root certificate"))
 			}
 			config := &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
 			connect := whoami.addr + whoami.port
 			handleClientSession(connect, config, whoami.nick, nl)
 		}
 	} else {
-		fmt.Println(lang.Lookup(locale, "Error in port number"))
+		fmt.Println(lang.Lookup(actualLocale, "Error in port number"))
 	}
 }

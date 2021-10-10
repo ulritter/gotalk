@@ -8,7 +8,7 @@ import (
 
 var lang *language.Config
 
-var locale string
+var actualLocale string
 
 const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
 const LANGFILE = "./language.json"

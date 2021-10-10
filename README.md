@@ -67,7 +67,7 @@ Server termination by SIGHUP (for the time being)
     ./gotalk client
     ./gotalk client --nick MyNick 
     ./gotalk client -n MyNick --address=127.0.0.1
-    ./gotalk client --nick=MyNick -a 127.0.0.1 --port 8089
+    ./gotalk client --nick=MyNick -a 127.0.0.1 --port 8089 --locale de
 
 ![Client example](https://github.com/ulritter/gotalk/blob/main/example.png)
 
@@ -98,5 +98,6 @@ Color Controls (long form and short form for each control)
 &NewLine;   
 
 
-In all cases \<address\> defaults to `localhost`, \<port\> defaults to `8089`, and \<nickname\> defaults to `J_Doe`
+In all cases \<address\> defaults to `localhost`, \<port\> defaults to `8089`, and \<nickname\> defaults to `J_Doe`,
+and \<locale\> defaults to the actual system setting. If no translation is available it falls back to english.
 

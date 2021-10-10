@@ -157,13 +157,13 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	u.mBox = container.NewVBox()
 	u.mScroll = container.NewScroll(u.mBox)
 	u.mScroll.SetMinSize(fyne.NewSize(MESSAGEWIDTH, MESSAGEHEIGHT))
-	u.mHeader = canvas.NewText(lang.Lookup(locale, " Messages"), HEADERCOLOR)
+	u.mHeader = canvas.NewText(lang.Lookup(actualLocale, " Messages"), HEADERCOLOR)
 	u.mHeader.TextStyle = HEADERSTYLE
 
 	u.sBox = container.NewVBox()
 	u.sScroll = container.NewScroll(u.sBox)
 	u.sScroll.SetMinSize(fyne.NewSize(STATUSWIDTH, STATUSHEIGHT))
-	u.sHeader = canvas.NewText(lang.Lookup(locale, " Status Info"), HEADERCOLOR)
+	u.sHeader = canvas.NewText(lang.Lookup(actualLocale, " Status Info"), HEADERCOLOR)
 	u.sHeader.TextStyle = HEADERSTYLE
 
 	u.input = widget.NewEntry()
@@ -182,7 +182,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 		}
 		u.mScroll.Refresh()
 		u.mScroll.ScrollToBottom()
-		//u.win.Canvas().Focus(u.input)
+		u.win.Canvas().Focus(u.input)
 	})
 
 	u.input.OnSubmitted = func(text string) {
@@ -196,7 +196,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 		}
 		u.mScroll.Refresh()
 		u.mScroll.ScrollToBottom()
-		//u.win.Canvas().Focus(u.input)
+		u.win.Canvas().Focus(u.input)
 	}
 
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
