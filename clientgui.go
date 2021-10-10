@@ -136,8 +136,6 @@ type Ui struct {
 	sHeader *canvas.Text
 	mBox    *fyne.Container
 	sBox    *fyne.Container
-	mMsgs   []MessageLine
-	sMsgs   []MessageLine
 	input   *widget.Entry
 	mScroll *container.Scroll
 	sScroll *container.Scroll
@@ -145,6 +143,9 @@ type Ui struct {
 	win     fyne.Window
 	ui_ref  *Ui
 	app     fyne.App
+	//for future use
+	mMsgs []MessageLine
+	sMsgs []MessageLine
 }
 
 //create new ui structure with fyne elements and
@@ -296,7 +297,7 @@ func checkColor(returnString string) (*color.RGBA, string, bool) {
 	//can check on the key strings in descending length.
 	//While this might look clumsy, we can now add any new color
 	//to the map definition(s) and it will be automatically
-	//recignized
+	//recognized
 	for i := 7; i > 1; i-- {
 		for colorKey, colorcode := range cmap {
 			if colorcode.len == i {

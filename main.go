@@ -24,7 +24,13 @@ func main() {
 		log.Fatal(err)
 		actualLocale = "en"
 	} else {
-		actualLocale = tag.String()[:2]
+		if len(tag.String()) > 2 {
+			actualLocale = tag.String()[:2]
+		} else {
+			if len(tag.String()) == 2 {
+				actualLocale = tag.String()
+			}
+		}
 	}
 
 	get_going()

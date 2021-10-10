@@ -20,7 +20,7 @@ func sendToServer(conn net.Conn, str string) error {
 }
 
 // display help text in the status are of the window (no server roudtrip required)
-func showHelp(nl Newline, u *Ui, test bool) {
+func showHelp(u *Ui, test bool) {
 	u.ShowStatus(" ", test)
 	u.ShowStatus(lang.Lookup(actualLocale, "Available commands:"), test)
 	u.ShowStatus(lang.Lookup(actualLocale, "  /exit, /quit, /q - terminate connection and exit"), test)
@@ -44,14 +44,14 @@ func showHelp(nl Newline, u *Ui, test bool) {
 }
 
 // display error message in the status are of the window (no server roudtrip required)
-func showError(nl Newline, u *Ui, test bool) {
+func showError(u *Ui, test bool) {
 	u.ShowStatus(" ", test)
 	u.ShowStatus(lang.Lookup(actualLocale, "Command error,"), test)
 	u.ShowStatus(lang.Lookup(actualLocale, "type /help of /? for command descriptions"), test)
 }
 
 //parse given string whether it is a command or not and take respective action
-func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
+func parseCommand(conn net.Conn, msg string, u *Ui, test bool) int {
 	if msg[0] != CMD_PREFIX {
 		return CODE_NOCMD
 	} else {
@@ -64,7 +64,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
-				showError(nl, u, test)
+				showError(u, test)
 				return CODE_DONOTHING
 			}
 		case CMD_EXIT2:
@@ -72,7 +72,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
-				showError(nl, u, test)
+				showError(u, test)
 				return CODE_DONOTHING
 			}
 		case CMD_EXIT3:
@@ -80,15 +80,15 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
 				return CODE_EXIT
 			} else {
-				showError(nl, u, test)
+				showError(u, test)
 				return CODE_DONOTHING
 			}
 		case CMD_HELP, CMD_HELP1:
 			if lc == 1 {
-				showHelp(nl, u, test)
+				showHelp(u, test)
 				return CODE_DONOTHING
 			} else {
-				showError(nl, u, test)
+				showError(u, test)
 				return CODE_DONOTHING
 			}
 		case CMD_LISTUSERS:
@@ -96,13 +96,13 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
 				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
 				return CODE_DONOTHING
 			} else {
-				showError(nl, u, test)
+				showError(u, test)
 				return CODE_DONOTHING
 			}
 		case CMD_CHANGENICK:
 			cmd_arguments := cmd[1:]
 			if len(cmd_arguments) != 1 {
-				showError(nl, u, test)
+				showError(u, test)
 				return CODE_DONOTHING
 			} else {
 				new_nick := cmd_arguments[0]
@@ -110,7 +110,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
 				return CODE_DONOTHING
 			}
 		default:
-			showError(nl, u, test)
+			showError(u, test)
 			return CODE_DONOTHING
 		}
 	}
@@ -122,7 +122,7 @@ func parseCommand(conn net.Conn, msg string, nl Newline, u *Ui, test bool) int {
 func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
 
 	if len(msg) > 0 {
-		switch cC := parseCommand(conn, msg, nl, u, false); cC {
+		switch cC := parseCommand(conn, msg, u, false); cC {
 		case CODE_NOCMD:
 			sendToServer(conn, msg+nl.NewLine())
 		case CODE_EXIT:

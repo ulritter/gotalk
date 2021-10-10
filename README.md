@@ -74,9 +74,10 @@ Server termination by SIGHUP (for the time being)
 &NewLine;   
 
 **Client commands:**
-- ,`/exit`,`/quit`,`/q` - close connection and exit
+- `/exit`,`/quit`,`/q` - close connection and exit
 - `/list` - displays active users in room
 - `/nick <nickname>` - change nickname
+- `/help`,`/?` - display help text
 
 &NewLine;   
 &NewLine;   
