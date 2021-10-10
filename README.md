@@ -1,6 +1,6 @@
 # gotalk
 
-## Simple Multi-user ad-hoc communication program.
+## Simple multi-user ad-hoc communication program.
 **The communication is secured using tls over tcp. The program can be started in server mode or in client mode (see below). In client mode the program starts a graphical user interface to accomodate both conversations and status messages. The client GUI is built using `fyne` (https://fyne.io/), a portable graphical toolkit.**
 
 &NewLine; 
