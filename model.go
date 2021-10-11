@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"net"
 
 	language "github.com/moemoe89/go-localization"
@@ -13,6 +14,14 @@ var actualLocale string
 const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
 const LANGFILE = "./language.json"
 
+const ACTION_CHANGENICK = "changenick"
+const ACTION_SENDMESSAGE = "message"
+const ACTION_LISTUSERS = "listusers"
+const ACTION_REVISION = "revision"
+const ACTION_SENDSTATUS = "status"
+const ACTION_EXIT = "exit"
+const ACTION_INIT = "init"
+
 const CMD_PREFIX = '/'
 const CMD_EXIT1 = "exit"
 const CMD_EXIT2 = "quit"
@@ -22,12 +31,6 @@ const CMD_LISTUSERS = "list"
 const CMD_ERROR = "error"
 const CMD_HELP = "help"
 const CMD_HELP1 = "?"
-const CMD_REVCHECK = "rev"
-const CMD_ESCAPE_CHAR = '\f'
-
-const CODE_NOCMD = 0
-const CODE_EXIT = 1
-const CODE_DONOTHING = 2
 
 const BUFSIZE = 4096
 
@@ -90,21 +93,46 @@ type WhoAmI struct {
 	nick   string
 }
 
+type Message struct {
+	Action string   `json:"action"`
+	Body   []string `json:"body"`
+}
+
+func (m Message) MarshalMSG() ([]byte, error) {
+	return json.Marshal(m)
+}
+
+func (m *Message) UnmarshalMSG(data []byte) error {
+	return json.Unmarshal(data, &m)
+}
+
+// send Message {} type json message over a connection
+func sendJSON(conn net.Conn, mtype string, str []string) error {
+	msg := Message{}
+	msg.Action = mtype
+	msg.Body = nil
+	for i := 0; i < len(str); i++ {
+		msg.Body = append(msg.Body, str[i])
+	}
+	b, _ := msg.MarshalMSG()
+	_, err := conn.Write(b)
+	return err
+}
+
 // Holding new line flavours for either linux or windows type systems
 type Newline struct {
 	nl string
 }
 
 //sends a message string from server to client
-func (s *Session) WriteMessage(str string) error {
-	_, err := s.conn.Write([]byte(str))
+func (s *Session) WriteMessage(str []string) error {
+	err := sendJSON(s.conn, ACTION_SENDMESSAGE, str)
 	return err
 }
 
 //sends a status string from server to client
-func (s *Session) WriteStatus(str string) error {
-	str = string(CMD_ESCAPE_CHAR) + str
-	_, err := s.conn.Write([]byte(str))
+func (s *Session) WriteStatus(str []string) error {
+	err := sendJSON(s.conn, ACTION_SENDSTATUS, str)
 	return err
 }
 

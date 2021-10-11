@@ -12,7 +12,6 @@ the program can start in server mode or in client mode. Client is GUI using fyne
 
 */
 
-// TODO: improve command line parameter handling, use map for parser
 // TODO: make it multi-room
 
 func main() {
