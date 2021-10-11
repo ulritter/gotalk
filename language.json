@@ -52,7 +52,8 @@
     "Connection request from ": "Connection request from ",
     " rejected. ":" rejected. ",
     "Wrong client revision level. Should be: ":"Wrong client revision level. Should be: ",
-    ", actual: ": ", aktuell: "
+    ", actual: ": ", aktuell: ",
+    "Warning: Corrupt JSON Message from: ": "Warning: Corrupt JSON Message from: "
     },
   "de": {
     "Failed to parse root certificate": "Fehler beim Überprüfen des Root Zertifikate",
@@ -107,6 +108,7 @@
     "Connection request from ": "Verbindungsversuch von ",
     " rejected. ":" abgeleht. ",
     "Wrong client revision level. Should be: ":"Falscher Client Revisions-Level. Sollte sein: ",
-    ", actual: ": ", aktuell: "
+    ", actual: ": ", aktuell: ",
+    "Warning: Corrupt JSON Message from: ": "Warnung: Ungültige JSON Nachricht von: "
     }
 }

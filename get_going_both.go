@@ -55,7 +55,7 @@ func get_going() {
 		whoami.server = true
 		whoami.port = cli.Server.Port
 		if len(cli.Server.Locale) > 0 {
-			actualLocale = cli.Client.Locale
+			actualLocale = cli.Server.Locale
 		}
 	}
 

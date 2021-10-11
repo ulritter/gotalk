@@ -13,12 +13,6 @@ import (
 	"fyne.io/fyne/v2/app"
 )
 
-// send a string to the server
-func sendToServer(conn net.Conn, str string) error {
-	_, err := fmt.Fprint(conn, str)
-	return err
-}
-
 // display help text in the status are of the window (no server roudtrip required)
 func showHelp(u *Ui) {
 	u.ShowStatus(" ")
@@ -51,89 +45,69 @@ func showError(u *Ui) {
 	u.ShowStatus(lang.Lookup(actualLocale, "type /help of /? for command descriptions"))
 }
 
-//parse given string whether it is a command or not and take respective action
-func parseCommand(conn net.Conn, msg string, u *Ui) int {
-	if msg[0] != CMD_PREFIX {
-		return CODE_NOCMD
-	} else {
-		cmdstring := msg[1:]
-		cmd := strings.Fields(cmdstring)
-		lc := len(cmd)
-		switch cmd[0] {
-		case CMD_EXIT1:
-			if lc == 1 {
-				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
-				return CODE_EXIT
-			} else {
-				showError(u)
-				return CODE_DONOTHING
-			}
-		case CMD_EXIT2:
-			if lc == 1 {
-				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
-				return CODE_EXIT
-			} else {
-				showError(u)
-				return CODE_DONOTHING
-			}
-		case CMD_EXIT3:
-			if lc == 1 {
-				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_EXIT1+string(CMD_ESCAPE_CHAR))
-				return CODE_EXIT
-			} else {
-				showError(u)
-				return CODE_DONOTHING
-			}
-		case CMD_HELP, CMD_HELP1:
-			if lc == 1 {
-				showHelp(u)
-				return CODE_DONOTHING
-			} else {
-				showError(u)
-				return CODE_DONOTHING
-			}
-		case CMD_LISTUSERS:
-			if lc == 1 {
-				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_LISTUSERS+string(CMD_ESCAPE_CHAR))
-				return CODE_DONOTHING
-			} else {
-				showError(u)
-				return CODE_DONOTHING
-			}
-		case CMD_CHANGENICK:
-			cmd_arguments := cmd[1:]
-			if len(cmd_arguments) != 1 {
-				showError(u)
-				return CODE_DONOTHING
-			} else {
-				new_nick := cmd_arguments[0]
-				sendToServer(conn, string(CMD_ESCAPE_CHAR)+CMD_CHANGENICK+string(CMD_ESCAPE_CHAR)+new_nick+string(CMD_ESCAPE_CHAR))
-				return CODE_DONOTHING
-			}
-		default:
-			showError(u)
-			return CODE_DONOTHING
-		}
-	}
-}
-
-// TODO: error handling for whole function
-
 // this function is called by ui events and starts to process the user input
-func processInput(conn net.Conn, msg string, nl Newline, u *Ui) error {
-
+func processInput(conn net.Conn, msg string, u *Ui) error {
 	if len(msg) > 0 {
-		switch cC := parseCommand(conn, msg, u); cC {
-		case CODE_NOCMD:
-			sendToServer(conn, msg+nl.NewLine())
-		case CODE_EXIT:
-			fmt.Println(lang.Lookup(actualLocale, "Goodbye"))
-			u.win.Close()
-			os.Exit(0)
-		case CODE_DONOTHING:
-			fallthrough
-		default:
-			break
+		if msg[0] != CMD_PREFIX {
+			return (sendJSON(conn, ACTION_SENDMESSAGE, []string{msg}))
+		} else {
+			cmd := strings.Fields(msg)
+			lc := len(cmd)
+			cmd[0] = cmd[0][1:] // strip leading command symbol
+
+			switch cmd[0] {
+			case CMD_EXIT1:
+				fallthrough
+			case CMD_EXIT2:
+				fallthrough
+			case CMD_EXIT3:
+				if lc == 1 {
+					sendJSON(conn, ACTION_EXIT, []string{""})
+					fmt.Println(lang.Lookup(actualLocale, "Goodbye"))
+					u.win.Close()
+					os.Exit(1)
+				} else {
+					showError(u)
+					return nil
+				}
+			case CMD_HELP:
+				fallthrough
+			case CMD_HELP1:
+				if lc == 1 {
+					showHelp(u)
+					return nil
+				} else {
+					showError(u)
+					return nil
+				}
+			case CMD_LISTUSERS:
+				if lc == 1 {
+					return (sendJSON(conn, ACTION_LISTUSERS, []string{""}))
+				} else {
+					showError(u)
+					return nil
+				}
+			case CMD_CHANGENICK:
+				cmdErr := false
+				if lc == 2 {
+					cmd_arguments := cmd[1:]
+					if len(cmd_arguments) != 1 || len(cmd_arguments[0]) == 0 {
+						cmdErr = true
+					} else {
+						return (sendJSON(conn, ACTION_CHANGENICK, []string{cmd_arguments[0]}))
+					}
+				} else {
+					cmdErr = true
+				}
+				if cmdErr {
+					showError(u)
+					return nil
+				}
+
+			default:
+				showError(u)
+				return nil
+			}
 		}
 	}
 	return nil
@@ -156,43 +130,55 @@ func handleClientSession(connect string, config *tls.Config, nick string, nl New
 
 	u := &Ui{win: myWindow, app: myApp}
 	content := u.newUi(conn, nl)
+	rmsg := Message{}
 
-	//send user nick and revision level
-	fmt.Fprintf(conn, string(CMD_ESCAPE_CHAR)+nick+string(CMD_ESCAPE_CHAR)+" "+REVISION)
+	err1 := sendJSON(conn, ACTION_INIT, []string{nick, REVISION})
 
-	go func() {
-		for { // TODO: error handling
-			n, err := conn.Read(buf)
-			if err != nil {
-				log.Printf(lang.Lookup(actualLocale, "Error reading from buffer, most likely server was terminated") + nl.NewLine())
-				conn.Close()
-				u.win.Close()
-				os.Exit(1)
-			}
-			if buf[0] != CMD_ESCAPE_CHAR {
-				msg := string(buf[:n])
-				u.ShowMessage(msg)
-			} else {
-				if n > 1 && buf[1] == CMD_ESCAPE_CHAR {
-					//2 escape characters means wrong revision level
-					expectedRevision := string(buf[2:])
-					log.Printf(lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", expectedRevision, REVISION)
+	if err1 == nil {
+		go func() {
+			for {
+				rmsg.Body = nil
+				n, err := conn.Read(buf)
+				if err == nil {
+					err := rmsg.UnmarshalMSG(buf[:n])
+					if err == nil {
+						switch rmsg.Action {
+						case ACTION_SENDMESSAGE:
+							for i := 0; i < len(rmsg.Body); i++ {
+								u.ShowMessage(rmsg.Body[i])
+							}
+						case ACTION_SENDSTATUS:
+							for i := 0; i < len(rmsg.Body); i++ {
+								u.ShowStatus(rmsg.Body[i])
+							}
+						case ACTION_REVISION:
+							if rmsg.Body[0] != REVISION {
+								log.Printf(lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", rmsg.Body[0], REVISION)
+								conn.Close()
+								u.win.Close()
+								os.Exit(1)
+							}
+						}
+					}
+				} else {
+					log.Printf(lang.Lookup(actualLocale, "Error reading from buffer, most likely server was terminated") + nl.NewLine())
 					conn.Close()
 					u.win.Close()
 					os.Exit(1)
-				} else {
-					msg := string(buf[1:n])
-					u.ShowStatus(msg)
+
 				}
 			}
-		}
-	}()
+		}()
 
-	myWindow.SetContent(content)
-	u.ShowStatus(fmt.Sprintf(lang.Lookup(actualLocale, "Connected to:")+" %s, "+lang.Lookup(actualLocale, "Nickname:")+" %s", connect, nick))
-	u.ShowStatus(" ")
-	myWindow.Canvas().Focus(u.input)
-	myWindow.ShowAndRun()
+		myWindow.SetContent(content)
+		u.ShowStatus(fmt.Sprintf(lang.Lookup(actualLocale, "Connected to:")+" %s, "+lang.Lookup(actualLocale, "Nickname:")+" %s", connect, nick))
+		u.ShowStatus(" ")
+		myWindow.Canvas().Focus(u.input)
+		myWindow.ShowAndRun()
+	} else {
+		log.Printf("Send Message failed, error is %v", err1)
+		return err1
+	}
 
 	return nil
 }

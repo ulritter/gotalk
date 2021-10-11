@@ -174,7 +174,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 
 	u.button = widget.NewButton(">>", func() {
 		if len(u.input.Text) > 0 {
-			processInput(conn, u.input.Text, nl, u)
+			processInput(conn, u.input.Text, u)
 			u.input.SetText("")
 		}
 		if actTheme != u.app.Settings().ThemeVariant() {
@@ -188,7 +188,7 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 
 	u.input.OnSubmitted = func(text string) {
 		if len(u.input.Text) > 0 {
-			processInput(conn, u.input.Text, nl, u)
+			processInput(conn, u.input.Text, u)
 			u.input.SetText("")
 		}
 		if actTheme != u.app.Settings().ThemeVariant() {
@@ -221,7 +221,14 @@ func (u *Ui) ShowMessage(msg string) {
 	// fill horizontal box making up the message line
 	for i := range mWords {
 		w := mWords[i]
-		if w[0] == '$' {
+		// if [nickname:] needs color change
+		if (i == 0) && (w[1] == '$') {
+			returnColor, inputWord, _ := checkColor(w[1 : len(w)-2])
+			t := canvas.NewText("["+inputWord+"]:", *returnColor)
+			t.TextStyle = linestyle
+
+			mb.Add(t)
+		} else if w[0] == '$' {
 			returnColor, inputWord, coloronly := checkColor(w)
 			if coloronly {
 				linecolor = *returnColor

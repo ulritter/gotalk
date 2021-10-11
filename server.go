@@ -19,60 +19,78 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 		log.Print(lang.Lookup(actualLocale, "Error reading from buffer")+nl.NewLine(), err)
 		return err
 	}
-	var nick string
+	msg := Message{}
+	msg.Body = nil
+	msg.UnmarshalMSG(buf[:n])
 
-	rawData := string(buf[:n])
-	rawDataFields := strings.Fields(rawData)
-
-	if len(rawDataFields) != 2 {
+	if (msg.Action != ACTION_INIT) || (len(msg.Body) != 2) {
 		return fmt.Errorf(lang.Lookup(actualLocale, "Wrong connection initialization message."))
-	} else if rawDataFields[1] != REVISION {
-		str := string(CMD_ESCAPE_CHAR) + string(CMD_ESCAPE_CHAR) + REVISION
-		conn.Write([]byte(str))
-		return fmt.Errorf(lang.Lookup(actualLocale, "Connection request from ")+conn.RemoteAddr().(*net.TCPAddr).IP.String()+lang.Lookup(actualLocale, " rejected. ")+lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", REVISION, rawDataFields[1])
-	}
-
-	assumedNick := rawDataFields[0]
-
-	if (assumedNick[0] == CMD_ESCAPE_CHAR) && (assumedNick[n-1] == CMD_ESCAPE_CHAR) {
-		nick = string(buf[1 : n-1])
 	} else {
-		nick = "J_Doe"
+		if msg.Body[1] != REVISION {
+			sendJSON(conn, ACTION_INIT, []string{REVISION})
+			return fmt.Errorf(lang.Lookup(actualLocale,
+				"Connection request from ")+conn.RemoteAddr().(*net.TCPAddr).IP.String()+lang.Lookup(actualLocale,
+				" rejected. ")+lang.Lookup(actualLocale,
+				"Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", REVISION, msg.Body[1])
+		}
 	}
-
-	user := &User{name: nick, session: session, timejoined: time.Now().Format("2006.01.02 15:04:05")}
+	user := &User{name: msg.Body[0], session: session, timejoined: time.Now().Format("2006.01.02 15:04:05")}
 	inputChannel <- ClientInput{
 		user,
 		&UserJoinedEvent{},
 	}
 
 	for {
-		n, err := conn.Read(buf)
+		n, err1 := conn.Read(buf)
+		if err1 != nil {
+			log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
+			inputChannel <- ClientInput{
+				user,
+				&UserLeftEvent{user, lang.Lookup(actualLocale, "Goodbye")},
+			}
+			return err1
+		}
 
-		if (buf[0] == CMD_ESCAPE_CHAR) || (err != nil) {
-			pattern := strings.Fields(string(buf[:n]))
-			if (len(pattern) == 1) && ((pattern[0] == (CMD_EXIT1)) || (pattern[0] == (CMD_EXIT2)) || (pattern[0] == (CMD_EXIT3))) || (err != nil) {
-				log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
+		msg.Action = ""
+		msg.Body = nil
+		err2 := msg.UnmarshalMSG(buf[:n])
+
+		if err2 != nil {
+			log.Printf(lang.Lookup(actualLocale, "Warning: Corrupt JSON Message from: ")+" %s"+nl.NewLine(), user.name)
+			log.Println(err2)
+		}
+
+		if msg.Action == ACTION_EXIT {
+			log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
+			inputChannel <- ClientInput{
+				user,
+				&UserLeftEvent{user, lang.Lookup(actualLocale, "Goodbye")},
+			}
+			return err1
+		}
+
+		switch msg.Action {
+		case ACTION_CHANGENICK:
+			if len(msg.Body) == 1 {
 				inputChannel <- ClientInput{
 					user,
-					&UserLeftEvent{user, lang.Lookup(actualLocale, "Goodbye")},
+					&UserChangedNickEvent{user, msg.Body[0]},
 				}
-				return err
-			} else if (len(pattern) == 2) && (pattern[0] == (CMD_CHANGENICK)) {
-				inputChannel <- ClientInput{
-					user,
-					&UserChangedNickEvent{user, pattern[1]},
-				}
-			} else if (len(pattern) == 1) && (pattern[0] == (CMD_LISTUSERS)) {
+			}
+		case ACTION_LISTUSERS:
+			if msg.Action == ACTION_LISTUSERS {
 				inputChannel <- ClientInput{
 					user,
 					&ListUsersEvent{user},
 				}
 			}
-		} else {
-			msg := strings.TrimSpace(string(string(buf[:n])))
-			e := ClientInput{user, &MessageEvent{msg}}
-			inputChannel <- e
+		case ACTION_SENDMESSAGE:
+			if len(msg.Body) == 1 {
+				sendmsg := strings.TrimSpace(msg.Body[0])
+				e := ClientInput{user, &MessageEvent{sendmsg}}
+				inputChannel <- e
+			}
+		default:
 		}
 
 	}

@@ -11,7 +11,7 @@ import (
 
 var cli struct {
 	Port   string `help:"Port number." short:"p" default:"8089"`
-	Locale string `help:"Language setting to be used." short:"l" `
+	Locale string `help:"Language setting to be used." short:"l"`
 }
 
 func get_going() {
