@@ -1,19 +1,13 @@
 package main
 
 import (
-	"log"
 	"net"
-	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2/app"
 )
-
-type parse_test struct {
-	code int
-	str  string
-}
 
 //TODO extend tests
 func TestClientSession(t *testing.T) {
@@ -25,43 +19,59 @@ func TestClientSession(t *testing.T) {
 	testApp := app.NewWithID(APPTITLE)
 	setColors(testApp)
 	testWindow := testApp.NewWindow(WINTITLE)
-	testMsg := Message{}
+
 	testUi := &Ui{win: testWindow, app: testApp}
 	testContent := testUi.newUi(client, testNl)
 
+	testMsg := Message{}
+	testSnd := Message{}
+
+	testSession := &Session{conn: server}
+
+	quit := make(chan bool)
+
+	timeoutDuration := 1 * time.Second
+
 	go func() {
 		for {
-			testMsg.Body = nil
-			n, err := client.Read(testBuf)
-			if err == nil {
-				err := testMsg.UnmarshalMSG(testBuf[:n])
+			select {
+			case <-quit:
+				return
+			default:
+				testMsg.Body = nil
+				client.SetReadDeadline(time.Now().Add(timeoutDuration))
+				n, err := client.Read(testBuf)
 				if err == nil {
-					switch testMsg.Action {
-					case ACTION_SENDMESSAGE:
-						for i := 0; i < len(testMsg.Body); i++ {
-							testUi.ShowMessage(testMsg.Body[i])
-						}
-					case ACTION_SENDSTATUS:
-						for i := 0; i < len(testMsg.Body); i++ {
-							testUi.ShowStatus(testMsg.Body[i])
-						}
-					case ACTION_REVISION:
-						if testMsg.Body[0] != REVISION {
-							log.Printf(lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", testMsg.Body[0], REVISION)
-							client.Close()
-							testUi.win.Close()
-							os.Exit(1)
+					err := testMsg.UnmarshalMSG(testBuf[:n])
+					if err == nil {
+						switch testMsg.Action {
+						case ACTION_SENDMESSAGE:
+							if len(testMsg.Body) == 0 {
+								t.Errorf("bad test user message")
+								t.Fail()
+							} else {
+								t.Log("ACTION_SENDMESSAGE passed")
+							}
+
+						case ACTION_SENDSTATUS:
+							if len(testMsg.Body) == 0 {
+								t.Errorf("bad test status mesage")
+								t.Fail()
+							} else {
+								t.Log("ACTION_SENDSTATUS passed")
+							}
+						case ACTION_REVISION:
+							if len(testMsg.Body) != 1 {
+								t.Errorf("bad test revision message")
+								t.Fail()
+							} else {
+								t.Log("ACTION_REVISION passed")
+							}
 						}
 					}
 				}
-			} else {
-				log.Printf(lang.Lookup(actualLocale, "Error reading from buffer, most likely server was terminated") + testNl.NewLine())
-				client.Close()
-				server.Close()
-				testUi.win.Close()
-				os.Exit(1)
-
 			}
+
 		}
 	}()
 
@@ -73,7 +83,18 @@ func TestClientSession(t *testing.T) {
 
 	testWindow.SetContent(testContent)
 
-	//TODO: Update tests to adapt to new json messages
+	testSnd.Body = nil
+	testSnd.Body = append(testSnd.Body, "Testmessage")
+	testSession.WriteMessage(testSnd.Body)
+
+	testSnd.Body = nil
+	testSnd.Body = append(testSnd.Body, "Test status")
+	testSession.WriteStatus(testSnd.Body)
+
+	sendJSON(testSession.conn, ACTION_REVISION, []string{REVISION})
+
+	quit <- true
 
 	client.Close()
+	server.Close()
 }

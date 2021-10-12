@@ -15,34 +15,34 @@ import (
 
 // display help text in the status are of the window (no server roudtrip required)
 func showHelp(u *Ui) {
-	u.ShowStatus(" ")
-	u.ShowStatus(lang.Lookup(actualLocale, "Available commands:"))
-	u.ShowStatus(lang.Lookup(actualLocale, "  /exit, /quit, /q - exit program"))
-	u.ShowStatus(lang.Lookup(actualLocale, "  /list - displays active users in room"))
-	u.ShowStatus(lang.Lookup(actualLocale, "  /nick <nickname> - change nickname"))
-	u.ShowStatus(lang.Lookup(actualLocale, "  /help, /?  - this list"))
-	u.ShowStatus(" ")
-	u.ShowStatus(lang.Lookup(actualLocale, "Available color controls:"))
-	u.ShowStatus(lang.Lookup(actualLocale, "General:"))
-	u.ShowStatus(lang.Lookup(actualLocale, "A color control followed by space will change"))
-	u.ShowStatus(lang.Lookup(actualLocale, "the color for the remainder of the line."))
-	u.ShowStatus(lang.Lookup(actualLocale, "A color control attached to a word will change"))
-	u.ShowStatus(lang.Lookup(actualLocale, "the color for the word."))
-	u.ShowStatus(lang.Lookup(actualLocale, " "))
-	u.ShowStatus(lang.Lookup(actualLocale, "Usage Example:"))
-	u.ShowStatus(lang.Lookup(actualLocale, "$red this is my $ytext"))
-	u.ShowStatus(lang.Lookup(actualLocale, " "))
-	u.ShowStatus(lang.Lookup(actualLocale, "Color Controls: (long form and short form):"))
-	u.ShowStatus(lang.Lookup(actualLocale, "$red $r $cyan $c $yellow $y $green $g"))
-	u.ShowStatus(lang.Lookup(actualLocale, "$purple $p $white $w $black $b "))
-	u.ShowStatus(" ")
+	u.ShowStatus(" ", false)
+	u.ShowStatus(lang.Lookup(actualLocale, "Available commands:"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "  /exit, /quit, /q - exit program"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "  /list - displays active users in room"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "  /nick <nickname> - change nickname"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "  /help, /?  - this list"), false)
+	u.ShowStatus(" ", false)
+	u.ShowStatus(lang.Lookup(actualLocale, "Available color controls:"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "General:"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "A color control followed by space will change"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "the color for the remainder of the line."), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "A color control attached to a word will change"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "the color for the word."), false)
+	u.ShowStatus(lang.Lookup(actualLocale, " "), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "Usage Example:"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "$red this is my $ytext"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, " "), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "Color Controls: (long form and short form):"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "$red $r $cyan $c $yellow $y $green $g"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "$purple $p $white $w $black $b "), false)
+	u.ShowStatus(" ", false)
 }
 
 // display error message in the status are of the window (no server roudtrip required)
 func showError(u *Ui) {
-	u.ShowStatus(" ")
-	u.ShowStatus(lang.Lookup(actualLocale, "Command error,"))
-	u.ShowStatus(lang.Lookup(actualLocale, "type /help of /? for command descriptions"))
+	u.ShowStatus(" ", false)
+	u.ShowStatus(lang.Lookup(actualLocale, "Command error,"), false)
+	u.ShowStatus(lang.Lookup(actualLocale, "type /help of /? for command descriptions"), false)
 }
 
 // this function is called by ui events and starts to process the user input
@@ -65,6 +65,7 @@ func processInput(conn net.Conn, msg string, u *Ui) error {
 					sendJSON(conn, ACTION_EXIT, []string{""})
 					fmt.Println(lang.Lookup(actualLocale, "Goodbye"))
 					u.win.Close()
+					conn.Close()
 					os.Exit(1)
 				} else {
 					showError(u)
@@ -145,34 +146,33 @@ func handleClientSession(connect string, config *tls.Config, nick string, nl New
 						switch rmsg.Action {
 						case ACTION_SENDMESSAGE:
 							for i := 0; i < len(rmsg.Body); i++ {
-								u.ShowMessage(rmsg.Body[i])
+								u.ShowMessage(rmsg.Body[i], false)
 							}
 						case ACTION_SENDSTATUS:
 							for i := 0; i < len(rmsg.Body); i++ {
-								u.ShowStatus(rmsg.Body[i])
+								u.ShowStatus(rmsg.Body[i], false)
 							}
 						case ACTION_REVISION:
 							if rmsg.Body[0] != REVISION {
 								log.Printf(lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", rmsg.Body[0], REVISION)
-								conn.Close()
 								u.win.Close()
+								conn.Close()
 								os.Exit(1)
 							}
 						}
 					}
 				} else {
 					log.Printf(lang.Lookup(actualLocale, "Error reading from buffer, most likely server was terminated") + nl.NewLine())
-					conn.Close()
 					u.win.Close()
+					conn.Close()
 					os.Exit(1)
-
 				}
 			}
 		}()
 
 		myWindow.SetContent(content)
-		u.ShowStatus(fmt.Sprintf(lang.Lookup(actualLocale, "Connected to:")+" %s, "+lang.Lookup(actualLocale, "Nickname:")+" %s", connect, nick))
-		u.ShowStatus(" ")
+		u.ShowStatus(fmt.Sprintf(lang.Lookup(actualLocale, "Connected to:")+" %s, "+lang.Lookup(actualLocale, "Nickname:")+" %s", connect, nick), false)
+		u.ShowStatus(" ", false)
 		myWindow.Canvas().Focus(u.input)
 		myWindow.ShowAndRun()
 	} else {

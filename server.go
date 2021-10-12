@@ -27,7 +27,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 		return fmt.Errorf(lang.Lookup(actualLocale, "Wrong connection initialization message."))
 	} else {
 		if msg.Body[1] != REVISION {
-			sendJSON(conn, ACTION_INIT, []string{REVISION})
+			sendJSON(conn, ACTION_REVISION, []string{REVISION})
 			return fmt.Errorf(lang.Lookup(actualLocale,
 				"Connection request from ")+conn.RemoteAddr().(*net.TCPAddr).IP.String()+lang.Lookup(actualLocale,
 				" rejected. ")+lang.Lookup(actualLocale,

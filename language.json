@@ -106,7 +106,7 @@
     "Error in port number": "Fehlerhafte Portnummer",
     "Wrong connection initialization message.": "Falsche Initialisierungsnachricht für Verbindung.",
     "Connection request from ": "Verbindungsversuch von ",
-    " rejected. ":" abgeleht. ",
+    " rejected. ":" abgelehnt. ",
     "Wrong client revision level. Should be: ":"Falscher Client Revisions-Level. Sollte sein: ",
     ", actual: ": ", aktuell: ",
     "Warning: Corrupt JSON Message from: ": "Warnung: Ungültige JSON Nachricht von: "

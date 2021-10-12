@@ -21,7 +21,7 @@ var cli struct {
 
 	Server struct {
 		Port   string `help:"Port number." short:"p" default:"8089"`
-		Locale string `help:"Language setting to be used." short:"l" default:"en"`
+		Locale string `help:"Language setting to be used." short:"l"`
 	} `cmd:"" help:"Start gotalk server."`
 }
 
