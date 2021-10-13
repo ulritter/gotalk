@@ -16,6 +16,11 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
+	if runtime.GOOS == "windows" {
+		newLine = "\r\n"
+	} else {
+		newLine = "\n"
+	}
 }
 
 // Initialize localization environment, if localization file is not present, create one by downloading it from github
@@ -61,15 +66,6 @@ func GetFileFromGithub(filepath string, url string) error {
 	defer out.Close()
 	_, err = io.Copy(out, resp.Body)
 	return err
-}
-
-// set newline representation for wither linux or windows systems
-func (n *Newline) Init() {
-	if runtime.GOOS == "windows" {
-		n.nl = "\r\n"
-	} else {
-		n.nl = "\n"
-	}
 }
 
 func portOK(p string) bool {

@@ -15,7 +15,7 @@ import (
 */
 func TestUiLayout(t *testing.T) {
 
-	test_content := testUi.newUi(testConn, testNl)
+	test_content := testUi.newUi()
 	o := test_content.(*fyne.Container).Objects
 	if len(o) != 1 {
 		t.Log("Wrong Ui Structure")
@@ -42,7 +42,7 @@ func TestUiLayout(t *testing.T) {
 
 func TestMessage(t *testing.T) {
 	for i := 0; i < MAXLINES+1; i++ {
-		testUi.ShowMessage("test message", true)
+		testUi.ShowMessage([]string{"test message"}, true)
 	}
 	if len(testUi.mMsgs) != MAXLINES ||
 		len(testUi.mBox.Objects) != MAXLINES {
@@ -53,7 +53,7 @@ func TestMessage(t *testing.T) {
 
 func TestStatus(t *testing.T) {
 	for i := 0; i < MAXLINES+1; i++ {
-		testUi.ShowStatus("test status", true)
+		testUi.ShowStatus([]string{"test status"}, true)
 	}
 	if len(testUi.sMsgs) != MAXLINES ||
 		len(testUi.sBox.Objects) != MAXLINES {

@@ -10,6 +10,7 @@ import (
 var lang *language.Config
 
 var actualLocale string
+var newLine string
 
 const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
 const LANGFILE = "./language.json"
@@ -107,7 +108,7 @@ func (m *Message) UnmarshalMSG(data []byte) error {
 }
 
 // send Message {} type json message over a connection
-func sendJSON(conn net.Conn, mtype string, str []string) error {
+func sendMessage(conn net.Conn, mtype string, str []string) error {
 	msg := Message{}
 	msg.Action = mtype
 	msg.Body = nil
@@ -119,24 +120,14 @@ func sendJSON(conn net.Conn, mtype string, str []string) error {
 	return err
 }
 
-// Holding new line flavours for either linux or windows type systems
-type Newline struct {
-	nl string
-}
-
 //sends a message string from server to client
 func (s *Session) WriteMessage(str []string) error {
-	err := sendJSON(s.conn, ACTION_SENDMESSAGE, str)
+	err := sendMessage(s.conn, ACTION_SENDMESSAGE, str)
 	return err
 }
 
 //sends a status string from server to client
 func (s *Session) WriteStatus(str []string) error {
-	err := sendJSON(s.conn, ACTION_SENDSTATUS, str)
+	err := sendMessage(s.conn, ACTION_SENDSTATUS, str)
 	return err
-}
-
-//returns newline character for either linux or windows type systems
-func (n *Newline) NewLine() string {
-	return n.nl
 }

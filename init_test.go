@@ -14,13 +14,12 @@ var testApp fyne.App
 var testWindow fyne.Window
 var testUi *Ui
 var testConn net.Conn
-var testNl Newline
 
 func testNlInit() {
 	if runtime.GOOS == "windows" {
-		testNl.nl = "\r\n"
+		newLine = "\r\n"
 	} else {
-		testNl.nl = "\n"
+		newLine = "\n"
 	}
 }
 

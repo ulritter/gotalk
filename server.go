@@ -10,13 +10,13 @@ import (
 )
 
 // read from connection, recognize request types and pass appropriate event types to the session handler (serverDialog())
-func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) error {
+func handleConnection(conn net.Conn, inputChannel chan ClientInput) error {
 	buf := make([]byte, BUFSIZE)
 
 	session := &Session{conn}
 	n, err := conn.Read(buf)
 	if err != nil {
-		log.Print(lang.Lookup(actualLocale, "Error reading from buffer")+nl.NewLine(), err)
+		log.Print(lang.Lookup(actualLocale, "Error reading from buffer")+newLine, err)
 		return err
 	}
 	msg := Message{}
@@ -26,8 +26,9 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 	if (msg.Action != ACTION_INIT) || (len(msg.Body) != 2) {
 		return fmt.Errorf(lang.Lookup(actualLocale, "Wrong connection initialization message."))
 	} else {
+		// expecting format {ACTION_INIT, [{<nickname>}, {<revision level>}]}
 		if msg.Body[1] != REVISION {
-			sendJSON(conn, ACTION_REVISION, []string{REVISION})
+			sendMessage(conn, ACTION_REVISION, []string{REVISION})
 			return fmt.Errorf(lang.Lookup(actualLocale,
 				"Connection request from ")+conn.RemoteAddr().(*net.TCPAddr).IP.String()+lang.Lookup(actualLocale,
 				" rejected. ")+lang.Lookup(actualLocale,
@@ -43,7 +44,7 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 	for {
 		n, err1 := conn.Read(buf)
 		if err1 != nil {
-			log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
+			log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+newLine, user.name)
 			inputChannel <- ClientInput{
 				user,
 				&UserLeftEvent{user, lang.Lookup(actualLocale, "Goodbye")},
@@ -56,12 +57,12 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 		err2 := msg.UnmarshalMSG(buf[:n])
 
 		if err2 != nil {
-			log.Printf(lang.Lookup(actualLocale, "Warning: Corrupt JSON Message from: ")+" %s"+nl.NewLine(), user.name)
+			log.Printf(lang.Lookup(actualLocale, "Warning: Corrupt JSON Message from: ")+" %s"+newLine, user.name)
 			log.Println(err2)
 		}
 
 		if msg.Action == ACTION_EXIT {
-			log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+nl.NewLine(), user.name)
+			log.Printf(lang.Lookup(actualLocale, "End condition, closing connection for:")+" %s"+newLine, user.name)
 			inputChannel <- ClientInput{
 				user,
 				&UserLeftEvent{user, lang.Lookup(actualLocale, "Goodbye")},
@@ -98,8 +99,8 @@ func handleConnection(conn net.Conn, inputChannel chan ClientInput, nl Newline) 
 
 // this function is called by main() in the case the app needs to operate as server
 // wait for connections and start a handler for each connection
-func startServer(eventChannel chan ClientInput, config *tls.Config, port string, nl Newline) error {
-	log.Printf(lang.Lookup(actualLocale, "Starting server on port ")+"%s"+nl.NewLine(), port)
+func startServer(eventChannel chan ClientInput, config *tls.Config, port string) error {
+	log.Printf(lang.Lookup(actualLocale, "Starting server on port ")+"%s"+newLine, port)
 	ln, err := tls.Listen("tcp", port, config)
 	if err != nil {
 		// handle error
@@ -109,12 +110,12 @@ func startServer(eventChannel chan ClientInput, config *tls.Config, port string,
 		conn, err := ln.Accept()
 		if err != nil {
 			// handle error
-			log.Print(lang.Lookup(actualLocale, "Error accepting connection")+nl.NewLine(), err)
+			log.Print(lang.Lookup(actualLocale, "Error accepting connection")+newLine, err)
 			continue
 		}
 		go func() {
-			if err := handleConnection(conn, eventChannel, nl); err != nil {
-				log.Print(lang.Lookup(actualLocale, "Error handling connection or unexpected client exit")+nl.NewLine(), err)
+			if err := handleConnection(conn, eventChannel); err != nil {
+				log.Print(lang.Lookup(actualLocale, "Error handling connection or unexpected client exit")+newLine, err)
 			}
 		}()
 

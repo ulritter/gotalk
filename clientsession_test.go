@@ -20,8 +20,8 @@ func TestClientSession(t *testing.T) {
 	setColors(testApp)
 	testWindow := testApp.NewWindow(WINTITLE)
 
-	testUi := &Ui{win: testWindow, app: testApp}
-	testContent := testUi.newUi(client, testNl)
+	testUi := &Ui{win: testWindow, app: testApp, conn: client}
+	testContent := testUi.newUi()
 
 	testMsg := Message{}
 	testSnd := Message{}
@@ -76,9 +76,9 @@ func TestClientSession(t *testing.T) {
 	}()
 
 	if runtime.GOOS == "windows" {
-		testNl.nl = "\r\n"
+		newLine = "\r\n"
 	} else {
-		testNl.nl = "\n"
+		newLine = "\n"
 	}
 
 	testWindow.SetContent(testContent)
@@ -91,7 +91,7 @@ func TestClientSession(t *testing.T) {
 	testSnd.Body = append(testSnd.Body, "Test status")
 	testSession.WriteStatus(testSnd.Body)
 
-	sendJSON(testSession.conn, ACTION_REVISION, []string{REVISION})
+	sendMessage(testSession.conn, ACTION_REVISION, []string{REVISION})
 
 	quit <- true
 

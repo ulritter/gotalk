@@ -7,18 +7,18 @@ import (
 )
 
 // dialog handling, broadcast user input to all users and status messages to all users or to a specific user depending on the request type
-func handleServerSession(clientInputChannel <-chan ClientInput, nl Newline) {
+func handleServerSession(clientInputChannel <-chan ClientInput) {
 	room := &Room{}
 	for input := range clientInputChannel {
 		switch event := input.event.(type) {
 		case *MessageEvent:
 			currentTime := time.Now()
-			log.Printf(lang.Lookup(actualLocale, "Received Message at")+" %s "+lang.Lookup(actualLocale, "from")+" [%s]: %s"+nl.NewLine(), currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
+			log.Printf(lang.Lookup(actualLocale, "Received Message at")+" %s "+lang.Lookup(actualLocale, "from")+" [%s]: %s"+newLine, currentTime.Format("2006.01.02 15:04:05"), input.user.name, event.msg)
 			for _, user := range room.users {
 				user.session.WriteMessage([]string{fmt.Sprintf("[%s]: %s", input.user.name, event.msg)})
 			}
 		case *UserJoinedEvent:
-			log.Printf("User joined: %s"+nl.NewLine(), input.user.name)
+			log.Printf("User joined: %s"+newLine, input.user.name)
 			room.users = append(room.users, input.user)
 			input.user.session.WriteStatus([]string{
 				fmt.Sprintf(lang.Lookup(actualLocale, "Welcome")+" %s", input.user.name),
@@ -32,7 +32,7 @@ func handleServerSession(clientInputChannel <-chan ClientInput, nl Newline) {
 				}
 			}
 		case *UserLeftEvent:
-			log.Printf(lang.Lookup(actualLocale, "User left:")+" %s %s"+nl.NewLine(), event.msg, event.user.name)
+			log.Printf(lang.Lookup(actualLocale, "User left:")+" %s %s"+newLine, event.msg, event.user.name)
 			var users []*User
 			for _, user := range room.users {
 				if user != input.user {

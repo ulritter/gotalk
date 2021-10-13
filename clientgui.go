@@ -36,11 +36,12 @@ var STATUSSTYLE = fyne.TextStyle{Bold: false, Italic: true}
 var actTheme fyne.ThemeVariant
 
 type Colorfield struct {
-	color color.RGBA
-	len   int
+	colorCode color.RGBA
+	len       int
 }
 
-//to add new colors, just add 'em here and they
+// color structures for both light and dark themes
+//to add new colors, just add them here and they
 //will be automatically both recognized and processed
 var cmap_light = map[string]Colorfield{
 	"$cyan":   {color.RGBA{20, 150, 220, 255}, 5},
@@ -146,11 +147,12 @@ type Ui struct {
 	//for future use
 	mMsgs []MessageLine
 	sMsgs []MessageLine
+	conn  net.Conn
 }
 
 //create new ui structure with fyne elements and
 //set the callbacks
-func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
+func (u *Ui) newUi() fyne.CanvasObject {
 
 	actTheme = u.app.Settings().ThemeVariant()
 	u.ui_ref = u
@@ -173,31 +175,11 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	vSeparator.Resize(fyne.NewSize(3, 400))
 
 	u.button = widget.NewButton(">>", func() {
-		if len(u.input.Text) > 0 {
-			processInput(conn, u.input.Text, u)
-			u.input.SetText("")
-		}
-		if actTheme != u.app.Settings().ThemeVariant() {
-			actTheme = u.app.Settings().ThemeVariant()
-			setColors(u.app)
-		}
-		u.mScroll.Refresh()
-		u.mScroll.ScrollToBottom()
-		u.win.Canvas().Focus(u.input)
+		processEntry(u)
 	})
 
 	u.input.OnSubmitted = func(text string) {
-		if len(u.input.Text) > 0 {
-			processInput(conn, u.input.Text, u)
-			u.input.SetText("")
-		}
-		if actTheme != u.app.Settings().ThemeVariant() {
-			actTheme = u.app.Settings().ThemeVariant()
-			setColors(u.app)
-		}
-		u.mScroll.Refresh()
-		u.mScroll.ScrollToBottom()
-		u.win.Canvas().Focus(u.input)
+		processEntry(u)
 	}
 
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
@@ -208,43 +190,59 @@ func (u *Ui) newUi(conn net.Conn, nl Newline) fyne.CanvasObject {
 	return container.New(layout.NewMaxLayout(), content)
 }
 
+func processEntry(u *Ui) {
+	if len(u.input.Text) > 0 {
+		parseInput(u.conn, u.input.Text, u)
+		u.input.SetText("")
+	}
+	if actTheme != u.app.Settings().ThemeVariant() {
+		actTheme = u.app.Settings().ThemeVariant()
+		setColors(u.app)
+	}
+	u.mScroll.Refresh()
+	u.mScroll.ScrollToBottom()
+	u.win.Canvas().Focus(u.input)
+}
+
 //display a user message in the (left hand) message area of the ui
 //check for inline color commands and populate the horizontal box
 //according to requested color values
-func (u *Ui) ShowMessage(msg string, test bool) {
+func (u *Ui) ShowMessage(msg []string, test bool) {
 	linecolor := MESSAGECOLOR
 	linestyle := MESSAGESTYLE
 
-	mWords := strings.Fields(msg)
-	mb := container.NewHBox()
+	for i := 0; i < len(msg); i++ {
+		mWords := strings.Fields(msg[i])
+		mb := container.NewHBox()
 
-	// fill horizontal box making up the message line
-	for i := range mWords {
-		w := mWords[i]
-		// if [nickname:] needs color change
-		if (i == 0) && (w[1] == '$') {
-			returnColor, inputWord, _ := checkColor(w[1 : len(w)-2])
-			t := canvas.NewText("["+inputWord+"]:", *returnColor)
-			t.TextStyle = linestyle
+		// fill horizontal box making up the message line
+		for k := range mWords {
+			w := mWords[k]
+			// if [nickname:] needs color change
+			if (k == 0) && (w[1] == '$') {
+				returnColor, inputWord, _ := checkColor(w[1 : len(w)-2])
+				t := canvas.NewText("["+inputWord+"]:", *returnColor)
+				t.TextStyle = linestyle
 
-			mb.Add(t)
-		} else if w[0] == '$' {
-			returnColor, inputWord, coloronly := checkColor(w)
-			if coloronly {
-				linecolor = *returnColor
+				mb.Add(t)
+			} else if w[0] == '$' {
+				returnColor, inputWord, coloronly := checkColor(w)
+				if coloronly {
+					linecolor = *returnColor
+				} else {
+					t := canvas.NewText(inputWord, *returnColor)
+					t.TextStyle = linestyle
+					mb.Add(t)
+				}
 			} else {
-				t := canvas.NewText(inputWord, *returnColor)
+				t := canvas.NewText(w, linecolor)
 				t.TextStyle = linestyle
 				mb.Add(t)
 			}
-		} else {
-			t := canvas.NewText(w, linecolor)
-			t.TextStyle = linestyle
-			mb.Add(t)
 		}
+		refreshVBoxContent(msg[i], &u.mMsgs, u.mBox, mb)
 	}
 
-	refreshVBoxContent(msg, &u.mMsgs, u.mBox, mb)
 	u.mBox.Refresh()
 	u.mScroll.Refresh()
 	u.mScroll.ScrollToBottom()
@@ -254,10 +252,12 @@ func (u *Ui) ShowMessage(msg string, test bool) {
 }
 
 //display a status message in the (right hand) status area of the ui
-func (u *Ui) ShowStatus(msg string, test bool) {
-	b := canvas.NewText(msg, STATUSCOLOR)
-	b.TextStyle = STATUSSTYLE
-	refreshVBoxContent(msg, &u.sMsgs, u.sBox, container.NewHBox(b))
+func (u *Ui) ShowStatus(msg []string, test bool) {
+	for i := 0; i < len(msg); i++ {
+		b := canvas.NewText(msg[i], STATUSCOLOR)
+		b.TextStyle = STATUSSTYLE
+		refreshVBoxContent(msg[i], &u.sMsgs, u.sBox, container.NewHBox(b))
+	}
 	u.sBox.Refresh()
 	u.sScroll.Refresh()
 	u.sScroll.ScrollToBottom()
@@ -310,13 +310,13 @@ func checkColor(returnString string) (*color.RGBA, string, bool) {
 			if colorcode.len == i {
 				if (len(returnString) == colorcode.len) && (returnString == colorKey) {
 					coloronly = true
-					returnColor = &colorcode.color
+					returnColor = &colorcode.colorCode
 					returnString = ""
 					return returnColor, returnString, coloronly
 				} else {
 					if (len(returnString) > colorcode.len) && (returnString[:colorcode.len] == colorKey) {
 						coloronly = false
-						returnColor = &colorcode.color
+						returnColor = &colorcode.colorCode
 						returnString = returnString[colorcode.len:]
 						return returnColor, returnString, coloronly
 					}

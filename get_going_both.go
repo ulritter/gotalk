@@ -27,9 +27,6 @@ var cli struct {
 
 func get_going() {
 
-	nl := Newline{}
-	nl.Init()
-
 	whoami := WhoAmI{}
 
 	ctx := kong.Parse(&cli,
@@ -68,13 +65,13 @@ func get_going() {
 		ch := make(chan ClientInput)
 
 		if whoami.server {
-			go handleServerSession(ch, nl)
+			go handleServerSession(ch)
 			cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
 			config := &tls.Config{Certificates: []tls.Certificate{cer}}
 			if err != nil {
 				log.Fatal(err)
 			}
-			err = startServer(ch, config, whoami.port, nl)
+			err = startServer(ch, config, whoami.port)
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -86,7 +83,7 @@ func get_going() {
 			}
 			config := &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
 			connect := whoami.addr + whoami.port
-			handleClientSession(connect, config, whoami.nick, nl)
+			handleClientSession(connect, config, whoami.nick)
 		}
 	} else {
 		fmt.Println(lang.Lookup(actualLocale, "Error in port number"))

@@ -16,9 +16,6 @@ var cli struct {
 
 func get_going() {
 
-	nl := Newline{}
-	nl.Init()
-
 	whoami := WhoAmI{}
 
 	kong.Parse(&cli,
