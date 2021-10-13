@@ -173,7 +173,7 @@ func handleClientSession(connect string, config *tls.Config, nick string) error 
 		myWindow.Canvas().Focus(u.input)
 		myWindow.ShowAndRun()
 	} else {
-		log.Printf("Send Message failed, error is %v", err1)
+		log.Printf(lang.Lookup(actualLocale, "Send Message failed, error is ")+"%v", err1)
 		return err1
 	}
 

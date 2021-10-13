@@ -1,36 +1,15 @@
 package main
 
 import (
-	"net"
 	"runtime"
 	"testing"
 	"time"
-
-	"fyne.io/fyne/v2/app"
 )
 
 //TODO extend tests
 func TestClientSession(t *testing.T) {
-
-	testBuf := make([]byte, BUFSIZE)
-
-	server, client := net.Pipe()
-
-	testApp := app.NewWithID(APPTITLE)
-	setColors(testApp)
-	testWindow := testApp.NewWindow(WINTITLE)
-
-	testUi := &Ui{win: testWindow, app: testApp, conn: client}
 	testContent := testUi.newUi()
-
-	testMsg := Message{}
-	testSnd := Message{}
-
-	testSession := &Session{conn: server}
-
 	quit := make(chan bool)
-
-	timeoutDuration := 1 * time.Second
 
 	go func() {
 		for {

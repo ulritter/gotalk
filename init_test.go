@@ -5,6 +5,7 @@ import (
 	"os"
 	"runtime"
 	"testing"
+	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
@@ -13,19 +14,41 @@ import (
 var testApp fyne.App
 var testWindow fyne.Window
 var testUi *Ui
-var testConn net.Conn
+var testBuf []byte
+var testContent fyne.CanvasObject
+var testMsg *Message
+var testSnd *Message
+var testSession *Session
+var timeoutDuration time.Duration
+var client net.Conn
+var server net.Conn
 
-func testNlInit() {
+func testSetUp() {
+
 	if runtime.GOOS == "windows" {
 		newLine = "\r\n"
 	} else {
 		newLine = "\n"
 	}
-}
 
-func testUiSetUp() {
+	testBuf = make([]byte, BUFSIZE)
 
-	testNlInit()
+	server, client = net.Pipe()
+
+	testApp = app.NewWithID(APPTITLE)
+	setColors(testApp)
+	testWindow = testApp.NewWindow(WINTITLE)
+
+	testUi = &Ui{win: testWindow, app: testApp, conn: client}
+	testContent = testUi.newUi()
+
+	testMsg = &Message{}
+	testSnd = &Message{}
+
+	testSession = &Session{conn: server}
+
+	timeoutDuration = 1 * time.Second
+
 	testApp = app.NewWithID(APPTITLE)
 	setColors(testApp)
 	testWindow = testApp.NewWindow(WINTITLE)
@@ -34,7 +57,7 @@ func testUiSetUp() {
 
 func TestMain(m *testing.M) {
 
-	testUiSetUp()
+	testSetUp()
 	exitVal := m.Run()
 
 	os.Exit(exitVal)
