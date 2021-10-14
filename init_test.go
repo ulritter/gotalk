@@ -1,14 +1,16 @@
 package main
 
 import (
+	"log"
 	"net"
 	"os"
-	"runtime"
 	"testing"
 	"time"
 
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
+	"github.com/Xuanwo/go-locale"
+	language "github.com/moemoe89/go-localization"
 )
 
 var testApp fyne.App
@@ -22,13 +24,33 @@ var testSession *Session
 var timeoutDuration time.Duration
 var client net.Conn
 var server net.Conn
+var newline string
 
 func testSetUp() {
+	cfg := language.New()
+	cfg.BindPath(LANGFILE)
+	cfg.BindMainLocale("en")
+	lang, lerr := cfg.Init()
+	if lerr != nil {
+		panic(lerr)
+	}
 
-	if runtime.GOOS == "windows" {
-		newLine = "\r\n"
+	tag, err := locale.Detect()
+	appConfig := config{
+		newline: newLine(),
+	}
+
+	if err != nil {
+		log.Fatal(err)
+		appConfig.locale = "en"
 	} else {
-		newLine = "\n"
+		if len(tag.String()) > 2 {
+			appConfig.locale = tag.String()[:2]
+		} else {
+			if len(tag.String()) == 2 {
+				appConfig.locale = tag.String()
+			}
+		}
 	}
 
 	testBuf = make([]byte, BUFSIZE)
@@ -39,7 +61,7 @@ func testSetUp() {
 	setColors(testApp)
 	testWindow = testApp.NewWindow(WINTITLE)
 
-	testUi = &Ui{win: testWindow, app: testApp, conn: client}
+	testUi = &Ui{win: testWindow, app: testApp, conn: client, locale: appConfig.locale, lang: lang}
 	testContent = testUi.newUi()
 
 	testMsg = &Message{}

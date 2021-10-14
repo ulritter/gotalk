@@ -2,15 +2,11 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net"
 
 	language "github.com/moemoe89/go-localization"
 )
-
-var lang *language.Config
-
-var actualLocale string
-var newLine string
 
 const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
 const LANGFILE = "./language.json"
@@ -87,12 +83,11 @@ type Room struct {
 }
 
 // Structure holding the command line parameters (are filled with defaults on startup)
-type WhoAmI struct {
+/*type WhoAmI struct {
 	server bool
 	addr   string
 	port   string
-	nick   string
-}
+} */
 
 type Message struct {
 	Action string   `json:"action"`
@@ -130,4 +125,19 @@ func (s *Session) WriteMessage(str []string) error {
 func (s *Session) WriteStatus(str []string) error {
 	err := sendMessage(s.conn, ACTION_SENDSTATUS, str)
 	return err
+}
+
+type config struct {
+	server  bool
+	addr    string
+	port    string
+	env     string
+	newline string
+	locale  string
+}
+
+type application struct {
+	config config
+	logger *log.Logger
+	lang   *language.Config
 }

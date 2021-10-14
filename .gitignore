@@ -5,5 +5,4 @@ gotalk.exe
 server.key
 server.pem
 secret.go
-clientsession.go.nugui
 clientgui.tst

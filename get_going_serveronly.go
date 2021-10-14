@@ -6,17 +6,15 @@ import (
 	"crypto/tls"
 	"fmt"
 	"github.com/alecthomas/kong"
-	"log"
 )
 
 var cli struct {
-	Port   string `help:"Port number." short:"p" default:"8089"`
-	Locale string `help:"Language setting to be used." short:"l"`
+	Port        string `help:"Port number." short:"p" default:"8089"`
+	Locale      string `help:"Language setting to be used." short:"l"`
+	Environment string `help:"Application environment (development|production)." short:"e" default:"development"`
 }
 
-func get_going() {
-
-	whoami := WhoAmI{}
+func (a *application) get_going() {
 
 	kong.Parse(&cli,
 		kong.Name("gotalk-server"),
@@ -27,31 +25,32 @@ func get_going() {
 			Summary: true,
 		}))
 
-	whoami.server = true
-	whoami.port = cli.Port
+	a.config.server = true
+	a.config.port = cli.Port
+	a.config.env = cli.Environment
 
 	if len(cli.Locale) > 0 {
-		actualLocale = cli.Locale
+		a.config.locale = cli.Locale
 	}
 
-	if portOK(whoami.port) {
-		if whoami.port[0] != ':' {
-			whoami.port = ":" + whoami.port
+	if portOK(a.config.port) {
+		if a.config.port[0] != ':' {
+			a.config.port = ":" + a.config.port
 		}
 
 		ch := make(chan ClientInput)
 
-		go handleServerSession(ch, nl)
+		go a.handleServerSession(ch)
 		cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
 		config := &tls.Config{Certificates: []tls.Certificate{cer}}
 		if err != nil {
-			log.Fatal(err)
+			a.logger.Fatal(err)
 		}
-		err = startServer(ch, config, whoami.port, nl)
+		err = a.startServer(ch, config, a.config.port)
 		if err != nil {
-			log.Fatal(err)
+			a.logger.Fatal(err)
 		}
 	} else {
-		fmt.Println(lang.Lookup(actualLocale, "Error in port number"))
+		fmt.Println(a.lang.Lookup(a.config.locale, "Error in port number"))
 	}
 }

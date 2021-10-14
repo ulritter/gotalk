@@ -6,28 +6,27 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"fmt"
-	"log"
 
 	"github.com/alecthomas/kong"
 )
 
 var cli struct {
 	Client struct {
-		Address string `help:"IP address or domain name." short:"a" default:"localhost"`
-		Port    string `help:"Port number." short:"p" default:"8089"`
-		Nick    string `help:"Nickname to be used." short:"n" default:"J_Doe"`
-		Locale  string `help:"Language setting to be used." short:"l" `
+		Address     string `help:"IP address or domain name." short:"a" default:"localhost"`
+		Port        string `help:"Port number." short:"p" default:"8089"`
+		Nick        string `help:"Nickname to be used." short:"n" default:"J_Doe"`
+		Locale      string `help:"Language setting to be used." short:"l" `
+		Environment string `help:"Application environment (development|production)." short:"e" default:"development"`
 	} `cmd:"" help:"Start gotalk client."`
 
 	Server struct {
-		Port   string `help:"Port number." short:"p" default:"8089"`
-		Locale string `help:"Language setting to be used." short:"l"`
+		Port        string `help:"Port number." short:"p" default:"8089"`
+		Locale      string `help:"Language setting to be used." short:"l"`
+		Environment string `help:"Application environment (development|production)." short:"e" default:"development"`
 	} `cmd:"" help:"Start gotalk server."`
 }
 
-func get_going() {
-
-	whoami := WhoAmI{}
+func (a *application) get_going() {
 
 	ctx := kong.Parse(&cli,
 		kong.Name("gotalk"),
@@ -37,55 +36,55 @@ func get_going() {
 			Compact: true,
 			Summary: true,
 		}))
+
 	switch ctx.Command() {
-
 	case "client":
-		whoami.server = false
-		whoami.addr = cli.Client.Address
-		whoami.port = cli.Client.Port
-		whoami.nick = cli.Client.Nick
+		a.config.server = false
+		a.config.addr = cli.Client.Address
+		a.config.port = cli.Client.Port
 		if len(cli.Client.Locale) > 0 {
-			actualLocale = cli.Client.Locale
+			a.config.locale = cli.Client.Locale
 		}
-
+		a.config.env = cli.Client.Environment
 	case "server":
-		whoami.server = true
-		whoami.port = cli.Server.Port
+		a.config.server = true
+		a.config.port = cli.Server.Port
 		if len(cli.Server.Locale) > 0 {
-			actualLocale = cli.Server.Locale
+			a.config.locale = cli.Server.Locale
 		}
+		a.config.env = cli.Server.Environment
 	}
 
-	if portOK(whoami.port) {
+	if portOK(a.config.port) {
 
-		if whoami.port[0] != ':' {
-			whoami.port = ":" + whoami.port
+		if a.config.port[0] != ':' {
+			a.config.port = ":" + a.config.port
 		}
 
 		ch := make(chan ClientInput)
 
-		if whoami.server {
-			go handleServerSession(ch)
+		if a.config.server {
+			go a.handleServerSession(ch)
 			cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
 			config := &tls.Config{Certificates: []tls.Certificate{cer}}
 			if err != nil {
-				log.Fatal(err)
+				a.logger.Fatal(err)
 			}
-			err = startServer(ch, config, whoami.port)
+			err = a.startServer(ch, config, a.config.port)
 			if err != nil {
-				log.Fatal(err)
+				a.logger.Fatal(err)
 			}
 		} else {
 			roots := x509.NewCertPool()
 			ok := roots.AppendCertsFromPEM([]byte(rootCert))
 			if !ok {
-				log.Fatal(lang.Lookup(actualLocale, "Failed to parse root certificate"))
+				a.logger.Fatal(a.lang.Lookup(a.config.locale, "Failed to parse root certificate"))
 			}
 			config := &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
-			connect := whoami.addr + whoami.port
-			handleClientSession(connect, config, whoami.nick)
+			connect := a.config.addr + a.config.port
+			a.handleClientSession(connect, config, cli.Client.Nick)
 		}
 	} else {
-		fmt.Println(lang.Lookup(actualLocale, "Error in port number"))
+		fmt.Println(a.lang.Lookup(a.config.locale, "Error in port number"))
 	}
 }

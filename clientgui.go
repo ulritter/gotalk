@@ -13,6 +13,7 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	language "github.com/moemoe89/go-localization"
 )
 
 const MAXLINES = 1024
@@ -144,10 +145,13 @@ type Ui struct {
 	win     fyne.Window
 	ui_ref  *Ui
 	app     fyne.App
+	conn    net.Conn
+	locale  string
+	lang    *language.Config
+	quit    chan bool
 	//for future use
 	mMsgs []MessageLine
 	sMsgs []MessageLine
-	conn  net.Conn
 }
 
 //create new ui structure with fyne elements and
@@ -160,13 +164,13 @@ func (u *Ui) newUi() fyne.CanvasObject {
 	u.mBox = container.NewVBox()
 	u.mScroll = container.NewScroll(u.mBox)
 	u.mScroll.SetMinSize(fyne.NewSize(MESSAGEWIDTH, MESSAGEHEIGHT))
-	u.mHeader = canvas.NewText(lang.Lookup(actualLocale, " Messages"), HEADERCOLOR)
+	u.mHeader = canvas.NewText(u.lang.Lookup(u.locale, " Messages"), HEADERCOLOR)
 	u.mHeader.TextStyle = HEADERSTYLE
 
 	u.sBox = container.NewVBox()
 	u.sScroll = container.NewScroll(u.sBox)
 	u.sScroll.SetMinSize(fyne.NewSize(STATUSWIDTH, STATUSHEIGHT))
-	u.sHeader = canvas.NewText(lang.Lookup(actualLocale, " Status Info"), HEADERCOLOR)
+	u.sHeader = canvas.NewText(u.lang.Lookup(u.locale, " Status Info"), HEADERCOLOR)
 	u.sHeader.TextStyle = HEADERSTYLE
 
 	u.input = widget.NewEntry()

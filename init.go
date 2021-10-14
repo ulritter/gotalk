@@ -10,21 +10,16 @@ import (
 	language "github.com/moemoe89/go-localization"
 )
 
-// init localization environment
-func init() {
-	err := initLocalization()
-	if err != nil {
-		panic(err)
-	}
+func newLine() string {
 	if runtime.GOOS == "windows" {
-		newLine = "\r\n"
+		return "\r\n"
 	} else {
-		newLine = "\n"
+		return "\n"
 	}
 }
 
 // Initialize localization environment, if localization file is not present, create one by downloading it from github
-func initLocalization() error {
+func (a *application) initLocalization() error {
 	if !fileExists(LANGFILE) {
 		fileUrl := RAWFILE
 		err := GetFileFromGithub(LANGFILE, fileUrl)
@@ -36,7 +31,7 @@ func initLocalization() error {
 	cfg := language.New()
 	cfg.BindPath(LANGFILE)
 	cfg.BindMainLocale("en")
-	lang, err = cfg.Init()
+	a.lang, err = cfg.Init()
 	if err != nil {
 		panic(err)
 	}

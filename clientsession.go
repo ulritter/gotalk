@@ -5,7 +5,6 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
-	"log"
 	"net"
 	"os"
 	"strings"
@@ -16,33 +15,33 @@ import (
 // display help text in the status are of the window (no server roudtrip required)
 func showHelp(u *Ui) {
 	u.ShowStatus([]string{" ",
-		lang.Lookup(actualLocale, "Available commands:"),
-		lang.Lookup(actualLocale, "  /exit, /quit, /q - exit program"),
-		lang.Lookup(actualLocale, "  /list - displays active users in room"),
-		lang.Lookup(actualLocale, "  /nick <nickname> - change nickname"),
-		lang.Lookup(actualLocale, "  /help, /?  - this list"),
+		u.lang.Lookup(u.locale, "Available commands:"),
+		u.lang.Lookup(u.locale, "  /exit, /quit, /q - exit program"),
+		u.lang.Lookup(u.locale, "  /list - displays active users in room"),
+		u.lang.Lookup(u.locale, "  /nick <nickname> - change nickname"),
+		u.lang.Lookup(u.locale, "  /help, /?  - this list"),
 		" ",
-		lang.Lookup(actualLocale, "Available color controls:"),
-		lang.Lookup(actualLocale, "General:"),
-		lang.Lookup(actualLocale, "A color control followed by space will change"),
-		lang.Lookup(actualLocale, "the color for the remainder of the line."),
-		lang.Lookup(actualLocale, "A color control attached to a word will change"),
-		lang.Lookup(actualLocale, "the color for the word."),
-		lang.Lookup(actualLocale, " "),
-		lang.Lookup(actualLocale, "Usage Example:"),
-		lang.Lookup(actualLocale, "$red this is my $ytext"),
-		lang.Lookup(actualLocale, " "),
-		lang.Lookup(actualLocale, "Color Controls: (long form and short form):"),
-		lang.Lookup(actualLocale, "$red $r $cyan $c $yellow $y $green $g"),
-		lang.Lookup(actualLocale, "$purple $p $white $w $black $b "),
+		u.lang.Lookup(u.locale, "Available color controls:"),
+		u.lang.Lookup(u.locale, "General:"),
+		u.lang.Lookup(u.locale, "A color control followed by space will change"),
+		u.lang.Lookup(u.locale, "the color for the remainder of the line."),
+		u.lang.Lookup(u.locale, "A color control attached to a word will change"),
+		u.lang.Lookup(u.locale, "the color for the word."),
+		u.lang.Lookup(u.locale, " "),
+		u.lang.Lookup(u.locale, "Usage Example:"),
+		u.lang.Lookup(u.locale, "$red this is my $ytext"),
+		u.lang.Lookup(u.locale, " "),
+		u.lang.Lookup(u.locale, "Color Controls: (long form and short form):"),
+		u.lang.Lookup(u.locale, "$red $r $cyan $c $yellow $y $green $g"),
+		u.lang.Lookup(u.locale, "$purple $p $white $w $black $b "),
 		" "}, false)
 }
 
 // display error message in the status are of the window (no server roudtrip required)
 func showError(u *Ui) {
 	u.ShowStatus([]string{" ",
-		lang.Lookup(actualLocale, "Command error,"),
-		lang.Lookup(actualLocale, "type /help of /? for command descriptions"),
+		u.lang.Lookup(u.locale, "Command error,"),
+		u.lang.Lookup(u.locale, "type /help of /? for command descriptions"),
 	}, false)
 }
 
@@ -63,11 +62,8 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 				fallthrough
 			case CMD_EXIT3:
 				if lc == 1 {
+					//TODO: channel to avoid race consdition
 					sendMessage(conn, ACTION_EXIT, []string{""})
-					fmt.Println(lang.Lookup(actualLocale, "Goodbye"))
-					u.win.Close()
-					conn.Close()
-					os.Exit(1)
 				} else {
 					showError(u)
 					return nil
@@ -118,7 +114,7 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 // this function is called by main() in the case the app needs to operate as client
 // it starts the conenction to the server, listens to the server,
 // creates the ui and starts the fyne ui loop
-func handleClientSession(connect string, config *tls.Config, nick string) error {
+func (a *application) handleClientSession(connect string, config *tls.Config, nick string) error {
 	buf := make([]byte, BUFSIZE)
 	conn, err := tls.Dial("tcp", connect, config)
 	if err != nil {
@@ -126,11 +122,11 @@ func handleClientSession(connect string, config *tls.Config, nick string) error 
 		return err
 	}
 
-	myApp := app.NewWithID(APPTITLE)
-	setColors(myApp)
-	myWindow := myApp.NewWindow(WINTITLE)
+	guiApp := app.NewWithID(APPTITLE)
+	setColors(guiApp)
+	myWindow := guiApp.NewWindow(WINTITLE)
 
-	u := &Ui{win: myWindow, app: myApp, conn: conn}
+	u := &Ui{win: myWindow, app: guiApp, conn: conn, locale: a.config.locale, lang: a.lang}
 	content := u.newUi()
 	rmsg := Message{}
 	// sending format {ACTION_INIT, [{<nickname>}, {<revision level>}]}
@@ -149,9 +145,14 @@ func handleClientSession(connect string, config *tls.Config, nick string) error 
 							u.ShowMessage(rmsg.Body, false)
 						case ACTION_SENDSTATUS:
 							u.ShowStatus(rmsg.Body, false)
+						case ACTION_EXIT:
+							fmt.Println(a.lang.Lookup(a.config.locale, "Goodbye"))
+							u.win.Close()
+							conn.Close()
+							os.Exit(1)
 						case ACTION_REVISION:
 							if rmsg.Body[0] != REVISION {
-								log.Printf(lang.Lookup(actualLocale, "Wrong client revision level. Should be: ")+" %s"+lang.Lookup(actualLocale, ", actual: ")+"%s", rmsg.Body[0], REVISION)
+								a.logger.Printf(a.lang.Lookup(a.config.locale, "Wrong client revision level. Should be: ")+" %s"+a.lang.Lookup(a.config.locale, ", actual: ")+"%s", rmsg.Body[0], REVISION)
 								u.win.Close()
 								conn.Close()
 								os.Exit(1)
@@ -159,21 +160,22 @@ func handleClientSession(connect string, config *tls.Config, nick string) error 
 						}
 					}
 				} else {
-					log.Printf(lang.Lookup(actualLocale, "Error reading from buffer, most likely server was terminated") + newLine)
+					a.logger.Printf(a.lang.Lookup(a.config.locale, "Error reading from buffer, most likely server was terminated") + a.config.newline)
 					u.win.Close()
 					conn.Close()
 					os.Exit(1)
 				}
+
 			}
 		}()
 
 		myWindow.SetContent(content)
-		u.ShowStatus([]string{fmt.Sprintf(lang.Lookup(actualLocale, "Connected to:")+" %s, "+lang.Lookup(actualLocale, "Nickname:")+" %s", connect, nick),
+		u.ShowStatus([]string{fmt.Sprintf(a.lang.Lookup(a.config.locale, "Connected to:")+" %s, "+a.lang.Lookup(a.config.locale, "Nickname:")+" %s", connect, nick),
 			" "}, false)
 		myWindow.Canvas().Focus(u.input)
 		myWindow.ShowAndRun()
 	} else {
-		log.Printf(lang.Lookup(actualLocale, "Send Message failed, error is ")+"%v", err1)
+		a.logger.Printf(a.lang.Lookup(a.config.locale, "Send Message failed, error is ")+"%v", err1)
 		return err1
 	}
 

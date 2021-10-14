@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/Xuanwo/go-locale"
 )
@@ -18,19 +19,27 @@ func main() {
 
 	//set actual locale to system default which can be overridden by cli flags
 	tag, err := locale.Detect()
+	appConfig := config{
+		newline: newLine(),
+	}
 
 	if err != nil {
 		log.Fatal(err)
-		actualLocale = "en"
+		appConfig.locale = "en"
 	} else {
 		if len(tag.String()) > 2 {
-			actualLocale = tag.String()[:2]
+			appConfig.locale = tag.String()[:2]
 		} else {
 			if len(tag.String()) == 2 {
-				actualLocale = tag.String()
+				appConfig.locale = tag.String()
 			}
 		}
 	}
-
-	get_going()
+	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	a := &application{
+		logger: logger,
+		config: appConfig,
+	}
+	a.initLocalization()
+	a.get_going()
 }

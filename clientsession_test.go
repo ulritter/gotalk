@@ -31,7 +31,6 @@ func TestClientSession(t *testing.T) {
 							} else {
 								t.Log("ACTION_SENDMESSAGE passed")
 							}
-
 						case ACTION_SENDSTATUS:
 							if len(testMsg.Body) == 0 {
 								t.Errorf("bad test status mesage")
@@ -55,9 +54,9 @@ func TestClientSession(t *testing.T) {
 	}()
 
 	if runtime.GOOS == "windows" {
-		newLine = "\r\n"
+		newline = "\r\n"
 	} else {
-		newLine = "\n"
+		newline = "\n"
 	}
 
 	testWindow.SetContent(testContent)
