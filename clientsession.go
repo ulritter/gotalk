@@ -65,7 +65,7 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 				fallthrough
 			case CMD_EXIT3:
 				if lc == 1 {
-					sendMessage(conn, ACTION_EXIT, []string{""})
+					sendMessage(conn, ACTION_EXIT, nil)
 				} else {
 					showError(u)
 					return nil
@@ -146,7 +146,7 @@ func (a *application) handleClientSession(connect string, config *tls.Config, ni
 	go func() {
 		//intercept signal and start closing roundtrip
 		<-c
-		sendMessage(conn, ACTION_EXIT, []string{""})
+		sendMessage(conn, ACTION_EXIT, nil)
 	}()
 
 	if err1 == nil {
@@ -187,7 +187,7 @@ func (a *application) handleClientSession(connect string, config *tls.Config, ni
 
 		//intercept quit and start closing roundtrip
 		myWindow.SetCloseIntercept(func() {
-			sendMessage(conn, ACTION_EXIT, []string{""})
+			sendMessage(conn, ACTION_EXIT, nil)
 		})
 
 		myWindow.ShowAndRun()
