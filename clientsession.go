@@ -7,8 +7,11 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"os/signal"
 	"strings"
+	"syscall"
 
+	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 )
 
@@ -62,7 +65,6 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 				fallthrough
 			case CMD_EXIT3:
 				if lc == 1 {
-					//TODO: channel to avoid race consdition
 					sendMessage(conn, ACTION_EXIT, []string{""})
 				} else {
 					showError(u)
@@ -111,6 +113,12 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 	return nil
 }
 
+func ciao(w fyne.Window, c net.Conn, e int) {
+	c.Close()
+	w.Close()
+	os.Exit(e)
+}
+
 // this function is called by main() in the case the app needs to operate as client
 // it starts the conenction to the server, listens to the server,
 // creates the ui and starts the fyne ui loop
@@ -129,8 +137,16 @@ func (a *application) handleClientSession(connect string, config *tls.Config, ni
 	u := &Ui{win: myWindow, app: guiApp, conn: conn, locale: a.config.locale, lang: a.lang}
 	content := u.newUi()
 	rmsg := Message{}
-	// sending format {ACTION_INIT, [{<nickname>}, {<revision level>}]}
+	// sending init message, format {ACTION_INIT, [{<nickname>}, {<revision level>}]}
 	err1 := sendMessage(conn, ACTION_INIT, []string{nick, REVISION})
+
+	//try to catch ^C signals etc
+	c := make(chan os.Signal, 2)
+	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+	go func() {
+		<-c
+		sendMessage(conn, ACTION_EXIT, []string{""})
+	}()
 
 	if err1 == nil {
 		go func() {
@@ -146,33 +162,33 @@ func (a *application) handleClientSession(connect string, config *tls.Config, ni
 						case ACTION_SENDSTATUS:
 							u.ShowStatus(rmsg.Body, false)
 						case ACTION_EXIT:
-							fmt.Println(a.lang.Lookup(a.config.locale, "Goodbye"))
-							u.win.Close()
-							conn.Close()
-							os.Exit(1)
+							fmt.Println(a.config.newline + a.lang.Lookup(a.config.locale, "Goodbye") + a.config.newline)
+							ciao(myWindow, conn, 0)
 						case ACTION_REVISION:
 							if rmsg.Body[0] != REVISION {
-								a.logger.Printf(a.lang.Lookup(a.config.locale, "Wrong client revision level. Should be: ")+" %s"+a.lang.Lookup(a.config.locale, ", actual: ")+"%s", rmsg.Body[0], REVISION)
-								u.win.Close()
-								conn.Close()
-								os.Exit(1)
+								fmt.Printf(a.lang.Lookup(a.config.locale, "Wrong client revision level. Should be: ")+" %s"+a.lang.Lookup(a.config.locale, ", actual: ")+"%s"+a.config.newline, rmsg.Body[0], REVISION)
+								ciao(myWindow, conn, 1)
 							}
 						}
 					}
 				} else {
-					a.logger.Printf(a.lang.Lookup(a.config.locale, "Error reading from buffer, most likely server was terminated") + a.config.newline)
-					u.win.Close()
-					conn.Close()
-					os.Exit(1)
+					a.logger.Printf(a.lang.Lookup(a.config.locale, "Error reading from network, most likely server was terminated") + a.config.newline)
+					ciao(myWindow, conn, 1)
 				}
-
 			}
 		}()
 
 		myWindow.SetContent(content)
 		u.ShowStatus([]string{fmt.Sprintf(a.lang.Lookup(a.config.locale, "Connected to:")+" %s, "+a.lang.Lookup(a.config.locale, "Nickname:")+" %s", connect, nick),
 			" "}, false)
+
 		myWindow.Canvas().Focus(u.input)
+
+		//intercept quit and start closing roundtrip
+		myWindow.SetCloseIntercept(func() {
+			sendMessage(conn, ACTION_EXIT, []string{""})
+		})
+
 		myWindow.ShowAndRun()
 	} else {
 		a.logger.Printf(a.lang.Lookup(a.config.locale, "Send Message failed, error is ")+"%v", err1)

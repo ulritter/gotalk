@@ -148,7 +148,6 @@ type Ui struct {
 	conn    net.Conn
 	locale  string
 	lang    *language.Config
-	quit    chan bool
 	//for future use
 	mMsgs []MessageLine
 	sMsgs []MessageLine

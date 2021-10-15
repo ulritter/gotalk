@@ -116,7 +116,7 @@ func (a *application) startServer(eventChannel chan ClientInput, config *tls.Con
 		}
 		go func() {
 			if err := a.handleConnection(conn, eventChannel); err != nil {
-				a.logger.Print(a.lang.Lookup(a.config.locale, "Error handling connection or unexpected client exit")+a.config.newline, err)
+				a.logger.Printf(a.lang.Lookup(a.config.locale, "Error handling connection or unexpected client exit")+": %v"+a.config.newline, err)
 			}
 		}()
 

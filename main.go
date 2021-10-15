@@ -35,7 +35,7 @@ func main() {
 			}
 		}
 	}
-	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
+	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime)
 	a := &application{
 		logger: logger,
 		config: appConfig,
