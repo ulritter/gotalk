@@ -82,7 +82,7 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 				}
 			case CMD_LISTUSERS:
 				if lc == 1 {
-					return (sendMessage(conn, ACTION_LISTUSERS, []string{""}))
+					return (sendMessage(conn, ACTION_LISTUSERS, nil))
 				} else {
 					showError(u)
 					return nil
