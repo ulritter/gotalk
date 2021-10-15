@@ -122,9 +122,10 @@ func ciao(w fyne.Window, c net.Conn, e int) {
 // this function is called by main() in the case the app needs to operate as client
 // it starts the conenction to the server, listens to the server,
 // creates the ui and starts the fyne ui loop
-func (a *application) handleClientSession(connect string, config *tls.Config, nick string) error {
+func (a *application) handleClientSession(nick string) error {
 	buf := make([]byte, BUFSIZE)
-	conn, err := tls.Dial("tcp", connect, config)
+	adr := a.config.addr + a.config.port
+	conn, err := tls.Dial("tcp", adr, a.config.tlsConfig)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -180,7 +181,7 @@ func (a *application) handleClientSession(connect string, config *tls.Config, ni
 		}()
 
 		myWindow.SetContent(content)
-		u.ShowStatus([]string{fmt.Sprintf(a.lang.Lookup(a.config.locale, "Connected to:")+" %s, "+a.lang.Lookup(a.config.locale, "Nickname:")+" %s", connect, nick),
+		u.ShowStatus([]string{fmt.Sprintf(a.lang.Lookup(a.config.locale, "Connected to:")+" %s, "+a.lang.Lookup(a.config.locale, "Nickname:")+" %s", adr, nick),
 			" "}, false)
 
 		myWindow.Canvas().Focus(u.input)

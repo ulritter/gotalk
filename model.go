@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"log"
 	"net"
@@ -11,6 +12,7 @@ import (
 const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk/main/language.json"
 const LANGFILE = "./language.json"
 
+// actions for client <-> server communication
 const ACTION_CHANGENICK = "changenick"
 const ACTION_SENDMESSAGE = "message"
 const ACTION_LISTUSERS = "listusers"
@@ -19,13 +21,13 @@ const ACTION_SENDSTATUS = "status"
 const ACTION_EXIT = "exit"
 const ACTION_INIT = "init"
 
+// end user commands on ui
 const CMD_PREFIX = '/'
 const CMD_EXIT1 = "exit"
 const CMD_EXIT2 = "quit"
 const CMD_EXIT3 = "q"
 const CMD_CHANGENICK = "nick"
 const CMD_LISTUSERS = "list"
-const CMD_ERROR = "error"
 const CMD_HELP = "help"
 const CMD_HELP1 = "?"
 
@@ -82,13 +84,6 @@ type Room struct {
 	users []*User
 }
 
-// Structure holding the command line parameters (are filled with defaults on startup)
-/*type WhoAmI struct {
-	server bool
-	addr   string
-	port   string
-} */
-
 type Message struct {
 	Action string   `json:"action"`
 	Body   []string `json:"body"`
@@ -127,13 +122,17 @@ func (s *Session) WriteStatus(str []string) error {
 	return err
 }
 
+// app config parameters and resources
 type config struct {
-	server  bool
-	addr    string
-	port    string
-	env     string
-	newline string
-	locale  string
+	server    bool
+	addr      string
+	port      string
+	env       string
+	newline   string
+	locale    string
+	ch        chan ClientInput
+	conn      net.Conn
+	tlsConfig *tls.Config
 }
 
 type application struct {

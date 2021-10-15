@@ -61,16 +61,15 @@ func (a *application) get_going() {
 			a.config.port = ":" + a.config.port
 		}
 
-		ch := make(chan ClientInput)
-
 		if a.config.server {
-			go a.handleServerSession(ch)
+			a.config.ch = make(chan ClientInput)
+			go a.handleServerSession()
 			cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
-			config := &tls.Config{Certificates: []tls.Certificate{cer}}
+			a.config.tlsConfig = &tls.Config{Certificates: []tls.Certificate{cer}}
 			if err != nil {
 				a.logger.Fatal(err)
 			}
-			err = a.startServer(ch, config, a.config.port)
+			err = a.startServer()
 			if err != nil {
 				a.logger.Fatal(err)
 			}
@@ -80,9 +79,9 @@ func (a *application) get_going() {
 			if !ok {
 				a.logger.Fatal(a.lang.Lookup(a.config.locale, "Failed to parse root certificate"))
 			}
-			config := &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
-			connect := a.config.addr + a.config.port
-			a.handleClientSession(connect, config, cli.Client.Nick)
+			a.config.tlsConfig = &tls.Config{RootCAs: roots, InsecureSkipVerify: true}
+
+			a.handleClientSession(cli.Client.Nick)
 		}
 	} else {
 		fmt.Println(a.lang.Lookup(a.config.locale, "Error in port number"))

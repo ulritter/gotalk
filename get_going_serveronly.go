@@ -38,15 +38,15 @@ func (a *application) get_going() {
 			a.config.port = ":" + a.config.port
 		}
 
-		ch := make(chan ClientInput)
+		a.config.ch = make(chan ClientInput)
 
-		go a.handleServerSession(ch)
+		go a.handleServerSession()
 		cer, err := tls.X509KeyPair([]byte(rootCert), []byte(serverKey))
-		config := &tls.Config{Certificates: []tls.Certificate{cer}}
+		a.config.tlsConfig = &tls.Config{Certificates: []tls.Certificate{cer}}
 		if err != nil {
 			a.logger.Fatal(err)
 		}
-		err = a.startServer(ch, config, a.config.port)
+		err = a.startServer()
 		if err != nil {
 			a.logger.Fatal(err)
 		}
