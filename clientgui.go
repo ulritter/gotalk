@@ -178,11 +178,11 @@ func (u *Ui) newUi() fyne.CanvasObject {
 	vSeparator.Resize(fyne.NewSize(3, 400))
 
 	u.button = widget.NewButton(">>", func() {
-		processEntry(u)
+		handleInput(u)
 	})
 
 	u.input.OnSubmitted = func(text string) {
-		processEntry(u)
+		handleInput(u)
 	}
 
 	inputline := container.NewBorder(nil, nil, nil, u.button, u.input)
@@ -193,7 +193,7 @@ func (u *Ui) newUi() fyne.CanvasObject {
 	return container.New(layout.NewMaxLayout(), content)
 }
 
-func processEntry(u *Ui) {
+func handleInput(u *Ui) {
 	if len(u.input.Text) > 0 {
 		parseInput(u.conn, u.input.Text, u)
 		u.input.SetText("")

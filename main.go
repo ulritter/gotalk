@@ -13,7 +13,14 @@ the program can start in server mode or in client mode. Client is GUI using fyne
 
 */
 
-// TODO: make it multi-room
+// TODO: multi-room
+// TODO: server: intercept signal and exit confirmation dialogue
+// TODO: client web interface (React)
+// TODO: server admin gui
+// TODO: server admin web interface
+// TODO: mobile versions (iOS / Android)
+// TODO: login / user management
+// TODO: IAM
 
 func main() {
 
