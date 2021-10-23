@@ -1,10 +1,9 @@
-//go:build !serveronly
-
 package main
 
 import (
 	"crypto/tls"
 	"fmt"
+	"gotalk/models"
 	"net"
 	"os"
 	"os/signal"
@@ -51,28 +50,28 @@ func showError(u *Ui) {
 // this function is called by ui events and starts to process the user input
 func parseInput(conn net.Conn, msg string, u *Ui) error {
 	if len(msg) > 0 {
-		if msg[0] != CMD_PREFIX {
-			return (sendMessage(conn, ACTION_SENDMESSAGE, []string{msg}))
+		if msg[0] != models.CMD_PREFIX {
+			return (models.SendMessage(conn, models.ACTION_SENDMESSAGE, []string{msg}))
 		} else {
 			cmd := strings.Fields(msg)
 			lc := len(cmd)
 			cmd[0] = cmd[0][1:] // strip leading command symbol
 
 			switch cmd[0] {
-			case CMD_EXIT1:
+			case models.CMD_EXIT1:
 				fallthrough
-			case CMD_EXIT2:
+			case models.CMD_EXIT2:
 				fallthrough
-			case CMD_EXIT3:
+			case models.CMD_EXIT3:
 				if lc == 1 {
-					sendMessage(conn, ACTION_EXIT, nil)
+					models.SendMessage(conn, models.ACTION_EXIT, nil)
 				} else {
 					showError(u)
 					return nil
 				}
-			case CMD_HELP:
+			case models.CMD_HELP:
 				fallthrough
-			case CMD_HELP1:
+			case models.CMD_HELP1:
 				if lc == 1 {
 					showHelp(u)
 					return nil
@@ -80,21 +79,21 @@ func parseInput(conn net.Conn, msg string, u *Ui) error {
 					showError(u)
 					return nil
 				}
-			case CMD_LISTUSERS:
+			case models.CMD_LISTUSERS:
 				if lc == 1 {
-					return (sendMessage(conn, ACTION_LISTUSERS, nil))
+					return (models.SendMessage(conn, models.ACTION_LISTUSERS, nil))
 				} else {
 					showError(u)
 					return nil
 				}
-			case CMD_CHANGENICK:
+			case models.CMD_CHANGENICK:
 				cmdErr := false
 				if lc == 2 {
 					cmd_arguments := cmd[1:]
 					if len(cmd_arguments) != 1 || len(cmd_arguments[0]) == 0 {
 						cmdErr = true
 					} else {
-						return (sendMessage(conn, ACTION_CHANGENICK, []string{cmd_arguments[0]}))
+						return (models.SendMessage(conn, models.ACTION_CHANGENICK, []string{cmd_arguments[0]}))
 					}
 				} else {
 					cmdErr = true
@@ -122,10 +121,11 @@ func ciao(w fyne.Window, c net.Conn, e int) {
 // this function is called by main() in the case the app needs to operate as client
 // it starts the conenction to the server, listens to the server,
 // creates the ui and starts the fyne ui loop
-func (a *application) handleClientSession(nick string) error {
-	buf := make([]byte, BUFSIZE)
-	adr := a.config.addr + a.config.port
-	conn, err := tls.Dial("tcp", adr, a.config.tlsConfig)
+func handleClientSession(a *models.Application, nick string) error {
+	buf := make([]byte, models.BUFSIZE)
+	adr := a.Config.Addr + a.Config.Port
+	a.Logger.Println("address: ", adr)
+	conn, err := tls.Dial("tcp", adr, a.Config.TLSconfig)
 	if err != nil {
 		fmt.Println(err)
 		return err
@@ -135,11 +135,11 @@ func (a *application) handleClientSession(nick string) error {
 	setColors(guiApp)
 	myWindow := guiApp.NewWindow(WINTITLE)
 
-	u := &Ui{win: myWindow, app: guiApp, conn: conn, locale: a.config.locale, lang: a.lang}
+	u := &Ui{win: myWindow, app: guiApp, conn: conn, locale: a.Config.Locale, lang: a.Lang}
 	content := u.newUi()
-	rmsg := Message{}
-	// sending init message, format {ACTION_INIT, [{<nickname>}, {<revision level>}]}
-	err1 := sendMessage(conn, ACTION_INIT, []string{nick, REVISION})
+	rmsg := models.Message{}
+	// sending init message, format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
+	err1 := models.SendMessage(conn, models.ACTION_INIT, []string{nick, models.REVISION})
 
 	//try to catch ^C signals etc
 	c := make(chan os.Signal, 2)
@@ -147,7 +147,7 @@ func (a *application) handleClientSession(nick string) error {
 	go func() {
 		//intercept signal and start closing roundtrip
 		<-c
-		sendMessage(conn, ACTION_EXIT, nil)
+		models.SendMessage(conn, models.ACTION_EXIT, nil)
 	}()
 
 	if err1 == nil {
@@ -159,41 +159,43 @@ func (a *application) handleClientSession(nick string) error {
 					err := rmsg.UnmarshalMSG(buf[:n])
 					if err == nil {
 						switch rmsg.Action {
-						case ACTION_SENDMESSAGE:
+						case models.ACTION_SENDMESSAGE:
 							u.ShowMessage(rmsg.Body, false)
-						case ACTION_SENDSTATUS:
+						case models.ACTION_SENDSTATUS:
 							u.ShowStatus(rmsg.Body, false)
-						case ACTION_EXIT:
-							fmt.Println(a.config.newline + a.lang.Lookup(a.config.locale, "Goodbye") + a.config.newline)
+						case models.ACTION_EXIT:
+							fmt.Println(a.Config.Newline + a.Lang.Lookup(a.Config.Locale, "Goodbye") + a.Config.Newline)
 							ciao(myWindow, conn, 0)
-						case ACTION_REVISION:
-							if rmsg.Body[0] != REVISION {
-								fmt.Printf(a.lang.Lookup(a.config.locale, "Wrong client revision level. Should be: ")+" %s"+a.lang.Lookup(a.config.locale, ", actual: ")+"%s"+a.config.newline, rmsg.Body[0], REVISION)
+						case models.ACTION_REVISION:
+							if rmsg.Body[0] != models.REVISION {
+								fmt.Printf(a.Lang.Lookup(a.Config.Locale,
+									"Wrong client revision level. Should be: ")+" %s"+a.Lang.Lookup(a.Config.Locale,
+									", actual: ")+"%s"+a.Config.Newline, rmsg.Body[0], models.REVISION)
 								ciao(myWindow, conn, 1)
 							}
 						}
 					}
 				} else {
-					a.logger.Printf(a.lang.Lookup(a.config.locale, "Error reading from network, most likely server was terminated") + a.config.newline)
+					a.Logger.Printf(a.Lang.Lookup(a.Config.Locale, "Error reading from network, most likely server was terminated") + a.Config.Newline)
 					ciao(myWindow, conn, 1)
 				}
 			}
 		}()
 
 		myWindow.SetContent(content)
-		u.ShowStatus([]string{fmt.Sprintf(a.lang.Lookup(a.config.locale, "Connected to:")+" %s, "+a.lang.Lookup(a.config.locale, "Nickname:")+" %s", adr, nick),
+		u.ShowStatus([]string{fmt.Sprintf(a.Lang.Lookup(a.Config.Locale, "Connected to:")+" %s, "+a.Lang.Lookup(a.Config.Locale, "Nickname:")+" %s", adr, nick),
 			" "}, false)
 
 		myWindow.Canvas().Focus(u.input)
 
 		//intercept quit and start closing roundtrip
 		myWindow.SetCloseIntercept(func() {
-			sendMessage(conn, ACTION_EXIT, nil)
+			models.SendMessage(conn, models.ACTION_EXIT, nil)
 		})
 
 		myWindow.ShowAndRun()
 	} else {
-		a.logger.Printf(a.lang.Lookup(a.config.locale, "Send Message failed, error is ")+"%v", err1)
+		a.Logger.Printf(a.Lang.Lookup(a.Config.Locale, "Send Message failed, error is ")+"%v", err1)
 		return err1
 	}
 

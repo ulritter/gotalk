@@ -1,6 +1,8 @@
 gotalk
 gotalk-server
 gotalk-server.exe
+gotalk-client
+gotalk-client.exe
 gotalk.exe
 server.key
 server.pem

@@ -1,5 +1,3 @@
-//go:build !serveronly
-
 package main
 
 import (
@@ -129,7 +127,7 @@ type MessageLine struct {
 	txt string
 	obj *fyne.Container
 	//for future use
-	sty fyne.TextStyle
+	//sty fyne.TextStyle
 }
 
 // data strcture to hold the ui elements

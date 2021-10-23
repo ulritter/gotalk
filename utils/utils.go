@@ -1,4 +1,4 @@
-package main
+package utils
 
 import (
 	"io"
@@ -6,11 +6,9 @@ import (
 	"os"
 	"runtime"
 	"strconv"
-
-	language "github.com/moemoe89/go-localization"
 )
 
-func newLine() string {
+func NewLine() string {
 	if runtime.GOOS == "windows" {
 		return "\r\n"
 	} else {
@@ -18,28 +16,8 @@ func newLine() string {
 	}
 }
 
-// Initialize localization environment, if localization file is not present, create one by downloading it from github
-func (a *application) initLocalization() error {
-	if !fileExists(LANGFILE) {
-		fileUrl := RAWFILE
-		err := GetFileFromGithub(LANGFILE, fileUrl)
-		if err != nil {
-			panic(err)
-		}
-	}
-	var err error
-	cfg := language.New()
-	cfg.BindPath(LANGFILE)
-	cfg.BindMainLocale("en")
-	a.lang, err = cfg.Init()
-	if err != nil {
-		panic(err)
-	}
-	return err
-}
-
 // check if a file exists
-func fileExists(filename string) bool {
+func FileExists(filename string) bool {
 	info, err := os.Stat(filename)
 	if os.IsNotExist(err) {
 		return false
@@ -63,7 +41,7 @@ func GetFileFromGithub(filepath string, url string) error {
 	return err
 }
 
-func portOK(p string) bool {
+func PortOK(p string) bool {
 
 	if p[0] == ':' && len(p) > 1 {
 		p = p[1:]

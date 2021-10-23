@@ -1,6 +1,8 @@
 package main
 
 import (
+	"gotalk/models"
+	"gotalk/utils"
 	"log"
 	"os"
 
@@ -22,31 +24,32 @@ the program can start in server mode or in client mode. Client is GUI using fyne
 // TODO: login / user management
 // TODO: IAM
 
+// app Config parameters and resources
+
 func main() {
 
 	//set actual locale to system default which can be overridden by cli flags
 	tag, err := locale.Detect()
-	appConfig := config{
-		newline: newLine(),
+	appConfig := models.Config{
+		Newline: utils.NewLine(),
 	}
-
 	if err != nil {
 		log.Fatal(err)
-		appConfig.locale = "en"
+		appConfig.Locale = "en"
 	} else {
 		if len(tag.String()) > 2 {
-			appConfig.locale = tag.String()[:2]
+			appConfig.Locale = tag.String()[:2]
 		} else {
 			if len(tag.String()) == 2 {
-				appConfig.locale = tag.String()
+				appConfig.Locale = tag.String()
 			}
 		}
 	}
 	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime)
-	a := &application{
-		logger: logger,
-		config: appConfig,
+	a := &models.Application{
+		Logger: logger,
+		Config: appConfig,
 	}
-	a.initLocalization()
-	a.get_going()
+	a.InitLocalization()
+	get_going(a)
 }

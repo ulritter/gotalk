@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gotalk/models"
 	"runtime"
 	"testing"
 	"time"
@@ -24,21 +25,21 @@ func TestClientSession(t *testing.T) {
 					err := testMsg.UnmarshalMSG(testBuf[:n])
 					if err == nil {
 						switch testMsg.Action {
-						case ACTION_SENDMESSAGE:
+						case models.ACTION_SENDMESSAGE:
 							if len(testMsg.Body) == 0 {
 								t.Errorf("bad test user message")
 								t.Fail()
 							} else {
 								t.Log("ACTION_SENDMESSAGE passed")
 							}
-						case ACTION_SENDSTATUS:
+						case models.ACTION_SENDSTATUS:
 							if len(testMsg.Body) == 0 {
 								t.Errorf("bad test status mesage")
 								t.Fail()
 							} else {
 								t.Log("ACTION_SENDSTATUS passed")
 							}
-						case ACTION_REVISION:
+						case models.ACTION_REVISION:
 							if len(testMsg.Body) != 1 {
 								t.Errorf("bad test revision message")
 								t.Fail()
@@ -69,7 +70,7 @@ func TestClientSession(t *testing.T) {
 	testSnd.Body = append(testSnd.Body, "Test status")
 	testSession.WriteStatus(testSnd.Body)
 
-	sendMessage(testSession.conn, ACTION_REVISION, []string{REVISION})
+	models.SendMessage(testSession.Conn, models.ACTION_REVISION, []string{models.REVISION})
 
 	quit <- true
 

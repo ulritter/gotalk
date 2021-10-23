@@ -7,32 +7,31 @@
 **Build the software:**
 - install golang
 - install fyne (see also https://developer.fyne.io/index.html)
-- Linux: on a standard Ubuntu 20.04 distro I had to install:
-  `sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama1 libxinerama-dev libxi-dev libxxf86vm-dev`
-- windows:  for 64 bit gcc (if not already installed) get the MinGW-w64 installer on the website below and chose x86_64 architecture during install:
-  `http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win32/Personal%20Builds/mingw-builds/installer/mingw-w64-install.exe/download`
-- install localization package: `go get github.com/moemoe89/go-localization`
+- install fyne system dependencies, e.g.:
+  - Linux: on a standard Ubuntu 20.04 distro I had to install:
+    `sudo apt-get install libgl1-mesa-dev libxcursor-dev libxrandr-dev libxinerama1 libxinerama-dev libxi-dev libxxf86vm-dev`
+  - windows:  for 64 bit gcc (if not already installed) get the MinGW-w64 installer on the website below and chose x86_64 architecture during install:
+- install command line parser (`go get github.com/alecthomas/kong`)
+- install localization package: (`go get github.com/moemoe89/go-localization`)
 - clone / download this repo
 - rename `secret.go.example` to `secret.go`
 - run `openssl ecparam -genkey -name prime256v1 -out server.key`
 - replace `serverKey` constant dummy content with content of `server.key` file
 - run `openssl req -new -x509 -key server.key -out server.pem -days 3650`
 - replace `rootCert` constant dummy content with content of `server.pem` file
-- run `go build -o gotalk` to build a binary containing both server and client functionality
-- run `go build -tags "serveronly" -o gotalk-server` to build a binary containing only server functionality
+- install `make`if not already present on your system
+- run `make all` to build both client and server binaries (target: `./bin` directory)
+- run `make client` to build the client binary (target: `./bin` directory)
+- run `make server` to build the server binary (target: `./bin` directory)
 
 
 &NewLine;  
 &NewLine;  
 
 **Run the software in server mode:**
-(watch the hyphen for the server-only version)
 
-    gotalk-server [options] (in case of serveronly binary)
-
-    gotalk server [options] (in case of server/client binary)
-
-    Usage: gotalk server
+    gotalk-server [options] 
+    Usage: gotalk-server
 
     Flags:
         -h, --help           Show context-sensitive help.
@@ -44,8 +43,8 @@
     
     ./gotalk-server 
     ./gotalk-server -p 8089 --locale=de
-    ./gotalk server - de
-    ./gotalk server --port=8089
+    ./gotalk-server -l de
+    ./gotalk-server --port=8089
 
 Server termination by SIGHUP (for the time being)
 
@@ -53,7 +52,7 @@ Server termination by SIGHUP (for the time being)
 
 	gotalk client [options]
 
-    Usage: gotalk client
+    Usage: gotalk-client
 
     Flags:
         -h, --help                   Show context-sensitive help.
@@ -64,10 +63,10 @@ Server termination by SIGHUP (for the time being)
 
 **Examples:**
 
-    ./gotalk client
-    ./gotalk client --nick MyNick 
-    ./gotalk client -n MyNick --address=127.0.0.1
-    ./gotalk client --nick=MyNick -a 127.0.0.1 --port 8089 --locale de
+    ./gotalk-client
+    ./gotalk-client --nick MyNick 
+    ./gotalk-client -n MyNick --address=127.0.0.1
+    ./gotalk-client --nick=MyNick -a 127.0.0.1 --port 8089 --locale de
 
 ![Client example](https://github.com/ulritter/gotalk/blob/main/example.png)
 
@@ -102,3 +101,6 @@ Color Controls (long form and short form for each control)
 In all cases \<address\> defaults to `localhost`, \<port\> defaults to `8089`, and \<nickname\> defaults to `J_Doe`,
 and \<locale\> defaults to the actual system setting. If no translation is available it falls back to english.
 
+TODOS:
+- switch to https based communication
+- create web client (React)

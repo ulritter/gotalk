@@ -1,4 +1,4 @@
-package main
+package models
 
 import (
 	"crypto/tls"
@@ -37,7 +37,7 @@ const REVISION = "0.8.1"
 
 // Event type for messages
 type MessageEvent struct {
-	msg string
+	Msg string
 }
 
 // Event type for users joining
@@ -46,42 +46,42 @@ type UserJoinedEvent struct {
 
 // Event type for users leaving
 type UserLeftEvent struct {
-	user *User
-	msg  string
+	User *User
+	Msg  string
 }
 
 // Event type for users changing their nick
 type UserChangedNickEvent struct {
-	user *User
-	nick string
+	User *User
+	Nick string
 }
 
 // Event type for users requesting a room user list
 type ListUsersEvent struct {
-	user *User
+	User *User
 }
 
 // Commmunication structure between connection handler and user session
 type ClientInput struct {
-	user  *User
-	event interface{}
+	User  *User
+	Event interface{}
 }
 
 // User Info
 type User struct {
-	name       string
-	session    *Session
-	timejoined string
+	Name       string
+	Session    *Session
+	Timejoined string
 }
 
 // Structure holding the connection for the session
 type Session struct {
-	conn net.Conn
+	Conn net.Conn
 }
 
 // Structure holding the users the room
 type Room struct {
-	users []*User
+	Users []*User
 }
 
 type Message struct {
@@ -98,7 +98,7 @@ func (m *Message) UnmarshalMSG(data []byte) error {
 }
 
 // send Message {} type json message over a connection
-func sendMessage(conn net.Conn, mtype string, str []string) error {
+func SendMessage(conn net.Conn, mtype string, str []string) error {
 	msg := Message{}
 	msg.Action = mtype
 	msg.Body = nil
@@ -112,31 +112,30 @@ func sendMessage(conn net.Conn, mtype string, str []string) error {
 
 //sends a message string from server to client
 func (s *Session) WriteMessage(str []string) error {
-	err := sendMessage(s.conn, ACTION_SENDMESSAGE, str)
+	err := SendMessage(s.Conn, ACTION_SENDMESSAGE, str)
 	return err
 }
 
 //sends a status string from server to client
 func (s *Session) WriteStatus(str []string) error {
-	err := sendMessage(s.conn, ACTION_SENDSTATUS, str)
+	err := SendMessage(s.Conn, ACTION_SENDSTATUS, str)
 	return err
 }
 
-// app config parameters and resources
-type config struct {
-	server    bool
-	addr      string
-	port      string
-	env       string
-	newline   string
-	locale    string
-	ch        chan ClientInput
-	conn      net.Conn
-	tlsConfig *tls.Config
+type Config struct {
+	Server    bool
+	Addr      string
+	Port      string
+	Env       string
+	Newline   string
+	Locale    string
+	Ch        chan ClientInput
+	Conn      net.Conn
+	TLSconfig *tls.Config
 }
 
-type application struct {
-	config config
-	logger *log.Logger
-	lang   *language.Config
+type Application struct {
+	Config Config
+	Logger *log.Logger
+	Lang   *language.Config
 }

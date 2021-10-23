@@ -1,6 +1,8 @@
 package main
 
 import (
+	"gotalk/models"
+	"gotalk/utils"
 	"log"
 	"net"
 	"os"
@@ -18,9 +20,9 @@ var testWindow fyne.Window
 var testUi *Ui
 var testBuf []byte
 var testContent fyne.CanvasObject
-var testMsg *Message
-var testSnd *Message
-var testSession *Session
+var testMsg *models.Message
+var testSnd *models.Message
+var testSession *models.Session
 var timeoutDuration time.Duration
 var client net.Conn
 var server net.Conn
@@ -28,7 +30,7 @@ var newline string
 
 func testSetUp() {
 	cfg := language.New()
-	cfg.BindPath(LANGFILE)
+	cfg.BindPath(models.LANGFILE)
 	cfg.BindMainLocale("en")
 	lang, lerr := cfg.Init()
 	if lerr != nil {
@@ -36,24 +38,24 @@ func testSetUp() {
 	}
 
 	tag, err := locale.Detect()
-	appConfig := config{
-		newline: newLine(),
+	appConfig := models.Config{
+		Newline: utils.NewLine(),
 	}
 
 	if err != nil {
 		log.Fatal(err)
-		appConfig.locale = "en"
+		appConfig.Locale = "en"
 	} else {
 		if len(tag.String()) > 2 {
-			appConfig.locale = tag.String()[:2]
+			appConfig.Locale = tag.String()[:2]
 		} else {
 			if len(tag.String()) == 2 {
-				appConfig.locale = tag.String()
+				appConfig.Locale = tag.String()
 			}
 		}
 	}
 
-	testBuf = make([]byte, BUFSIZE)
+	testBuf = make([]byte, models.BUFSIZE)
 
 	server, client = net.Pipe()
 
@@ -61,13 +63,13 @@ func testSetUp() {
 	setColors(testApp)
 	testWindow = testApp.NewWindow(WINTITLE)
 
-	testUi = &Ui{win: testWindow, app: testApp, conn: client, locale: appConfig.locale, lang: lang}
+	testUi = &Ui{win: testWindow, app: testApp, conn: client, locale: appConfig.Locale, lang: lang}
 	testContent = testUi.newUi()
 
-	testMsg = &Message{}
-	testSnd = &Message{}
+	testMsg = &models.Message{}
+	testSnd = &models.Message{}
 
-	testSession = &Session{conn: server}
+	testSession = &models.Session{Conn: server}
 
 	timeoutDuration = 1 * time.Second
 
