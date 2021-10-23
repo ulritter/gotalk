@@ -70,7 +70,7 @@ func TestClientSession(t *testing.T) {
 	testSnd.Body = append(testSnd.Body, "Test status")
 	testSession.WriteStatus(testSnd.Body)
 
-	models.SendMessage(testSession.Conn, models.ACTION_REVISION, []string{models.REVISION})
+	models.SendJSONMessage(testSession.Conn, models.ACTION_REVISION, []string{models.REVISION})
 
 	quit <- true
 

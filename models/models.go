@@ -9,8 +9,8 @@ import (
 	language "github.com/moemoe89/go-localization"
 )
 
-const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk-app/main/models/language.json"
-const LANGFILE = "./language.json"
+const RAWFILE = "https://raw.githubusercontent.com/ulritter/gotalk-app/main/language.json"
+const LANGFILE = "../language.json"
 
 // actions for client <-> server communication
 const ACTION_CHANGENICK = "changenick"
