@@ -50,7 +50,7 @@ Server termination by SIGHUP (for the time being)
 
 **Run the software in client mode:**
 
-	gotalk client [options]
+	gotalk-client [options]
 
     Usage: gotalk-client
 

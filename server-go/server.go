@@ -28,7 +28,7 @@ func handleConnection(a *models.Application) error {
 	} else {
 		// expecting format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
 		if msg.Body[1] != models.REVISION {
-			models.SendMessage(a.Config.Conn, models.ACTION_REVISION, []string{models.REVISION})
+			models.SendJSONMessage(a.Config.Conn, models.ACTION_REVISION, []string{models.REVISION})
 			return fmt.Errorf(a.Lang.Lookup(a.Config.Locale,
 				"Connection request from ")+a.Config.Conn.RemoteAddr().(*net.TCPAddr).IP.String()+a.Lang.Lookup(a.Config.Locale,
 				" rejected. ")+a.Lang.Lookup(a.Config.Locale,
@@ -65,7 +65,7 @@ func handleConnection(a *models.Application) error {
 		if msg.Action == models.ACTION_EXIT {
 			a.Logger.Printf(a.Lang.Lookup(a.Config.Locale, "End condition, closing connection for:")+" %s"+a.Config.Newline, user.Name)
 			//echo exit condition for organized client shutdown
-			models.SendMessage(a.Config.Conn, models.ACTION_EXIT, nil)
+			models.SendJSONMessage(a.Config.Conn, models.ACTION_EXIT, nil)
 			a.Config.Ch <- models.ClientInput{
 				User:  user,
 				Event: &models.UserLeftEvent{User: user, Msg: a.Lang.Lookup(a.Config.Locale, "Goodbye")},

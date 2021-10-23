@@ -98,7 +98,7 @@ func (m *Message) UnmarshalMSG(data []byte) error {
 }
 
 // send Message {} type json message over a connection
-func SendMessage(conn net.Conn, mtype string, str []string) error {
+func SendJSONMessage(conn net.Conn, mtype string, str []string) error {
 	msg := Message{}
 	msg.Action = mtype
 	msg.Body = nil
@@ -112,13 +112,13 @@ func SendMessage(conn net.Conn, mtype string, str []string) error {
 
 //sends a message string from server to client
 func (s *Session) WriteMessage(str []string) error {
-	err := SendMessage(s.Conn, ACTION_SENDMESSAGE, str)
+	err := SendJSONMessage(s.Conn, ACTION_SENDMESSAGE, str)
 	return err
 }
 
 //sends a status string from server to client
 func (s *Session) WriteStatus(str []string) error {
-	err := SendMessage(s.Conn, ACTION_SENDSTATUS, str)
+	err := SendJSONMessage(s.Conn, ACTION_SENDSTATUS, str)
 	return err
 }
 

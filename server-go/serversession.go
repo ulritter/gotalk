@@ -74,6 +74,7 @@ func handleServerSession(a *models.Application) {
 			for _, user := range room.Users {
 				list = append(list, fmt.Sprintf("[%s] - "+a.Lang.Lookup(a.Config.Locale, "joined at")+" [%s]", user.Name, user.Timejoined))
 			}
+			list = append(list, " ")
 			input.User.Session.WriteStatus(list)
 		}
 	}

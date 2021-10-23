@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gotalk/models"
 	"image/color"
 	"net"
 	"strings"
@@ -193,7 +194,7 @@ func (u *Ui) newUi() fyne.CanvasObject {
 
 func handleInput(u *Ui) {
 	if len(u.input.Text) > 0 {
-		parseInput(u.conn, u.input.Text, u)
+		u.parseInput()
 		u.input.SetText("")
 	}
 	if actTheme != u.app.Settings().ThemeVariant() {
@@ -265,6 +266,105 @@ func (u *Ui) ShowStatus(msg []string, test bool) {
 	if !test {
 		u.win.Canvas().Focus(u.input)
 	}
+}
+
+// this function is called by ui events and starts to process the user input
+func (u *Ui) parseInput() error {
+	msg := u.input.Text
+	if len(msg) > 0 {
+		if msg[0] != models.CMD_PREFIX {
+			return (models.SendJSONMessage(u.conn, models.ACTION_SENDMESSAGE, []string{msg}))
+		} else {
+			cmd := strings.Fields(msg)
+			lc := len(cmd)
+			cmd[0] = cmd[0][1:] // strip leading command symbol
+
+			switch cmd[0] {
+			case models.CMD_EXIT1:
+				fallthrough
+			case models.CMD_EXIT2:
+				fallthrough
+			case models.CMD_EXIT3:
+				if lc == 1 {
+					models.SendJSONMessage(u.conn, models.ACTION_EXIT, nil)
+				} else {
+					u.showError()
+					return nil
+				}
+			case models.CMD_HELP:
+				fallthrough
+			case models.CMD_HELP1:
+				if lc == 1 {
+					u.showHelp()
+					return nil
+				} else {
+					u.showError()
+					return nil
+				}
+			case models.CMD_LISTUSERS:
+				if lc == 1 {
+					return (models.SendJSONMessage(u.conn, models.ACTION_LISTUSERS, nil))
+				} else {
+					u.showError()
+					return nil
+				}
+			case models.CMD_CHANGENICK:
+				cmdErr := false
+				if lc == 2 {
+					cmd_arguments := cmd[1:]
+					if len(cmd_arguments) != 1 || len(cmd_arguments[0]) == 0 {
+						cmdErr = true
+					} else {
+						return (models.SendJSONMessage(u.conn, models.ACTION_CHANGENICK, []string{cmd_arguments[0]}))
+					}
+				} else {
+					cmdErr = true
+				}
+				if cmdErr {
+					u.showError()
+					return nil
+				}
+
+			default:
+				u.showError()
+				return nil
+			}
+		}
+	}
+	return nil
+}
+
+// display help text in the status are of the window (no server roudtrip required)
+func (u *Ui) showHelp() {
+	u.ShowStatus([]string{" ",
+		u.lang.Lookup(u.locale, "Available commands:"),
+		u.lang.Lookup(u.locale, "  /exit, /quit, /q - exit program"),
+		u.lang.Lookup(u.locale, "  /list - displays active users in room"),
+		u.lang.Lookup(u.locale, "  /nick <nickname> - change nickname"),
+		u.lang.Lookup(u.locale, "  /help, /?  - this list"),
+		" ",
+		u.lang.Lookup(u.locale, "Available color controls:"),
+		u.lang.Lookup(u.locale, "General:"),
+		u.lang.Lookup(u.locale, "A color control followed by space will change"),
+		u.lang.Lookup(u.locale, "the color for the remainder of the line."),
+		u.lang.Lookup(u.locale, "A color control attached to a word will change"),
+		u.lang.Lookup(u.locale, "the color for the word."),
+		u.lang.Lookup(u.locale, " "),
+		u.lang.Lookup(u.locale, "Usage Example:"),
+		u.lang.Lookup(u.locale, "$red this is my $ytext"),
+		u.lang.Lookup(u.locale, " "),
+		u.lang.Lookup(u.locale, "Color Controls: (long form and short form):"),
+		u.lang.Lookup(u.locale, "$red $r $cyan $c $yellow $y $green $g"),
+		u.lang.Lookup(u.locale, "$purple $p $white $w $black $b "),
+		" "}, false)
+}
+
+// display error message in the status are of the window (no server roudtrip required)
+func (u *Ui) showError() {
+	u.ShowStatus([]string{" ",
+		u.lang.Lookup(u.locale, "Command error,"),
+		u.lang.Lookup(u.locale, "type /help of /? for command descriptions"),
+	}, false)
 }
 
 //append new message / container to existing message slice / container
