@@ -104,3 +104,6 @@ and \<locale\> defaults to the actual system setting. If no translation is avail
 TODOS:
 - switch to https based communication
 - create web client (React)
+
+**Deployment Options:**
+- Samlple Dockerfile for TCP server included

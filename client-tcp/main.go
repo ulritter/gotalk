@@ -5,8 +5,6 @@ import (
 	"gotalk/utils"
 	"log"
 	"os"
-
-	"github.com/Xuanwo/go-locale"
 )
 
 /*
@@ -27,23 +25,12 @@ the program can start in server mode or in client mode. Client is GUI using fyne
 func main() {
 
 	//set actual locale to system default which can be overridden by cli flags
-	tag, err := locale.Detect()
+
 	appConfig := models.Config{
 		Newline: utils.NewLine(),
+		Locale:  utils.GetLocale(),
 	}
 
-	if err != nil {
-		log.Fatal(err)
-		appConfig.Locale = "en"
-	} else {
-		if len(tag.String()) > 2 {
-			appConfig.Locale = tag.String()[:2]
-		} else {
-			if len(tag.String()) == 2 {
-				appConfig.Locale = tag.String()
-			}
-		}
-	}
 	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime)
 	a := &models.Application{
 		Logger: logger,

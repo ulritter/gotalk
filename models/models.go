@@ -33,7 +33,7 @@ const CMD_HELP1 = "?"
 
 const BUFSIZE = 4096
 
-const REVISION = "0.8.1"
+const REVISION = "0.8.3"
 
 // Event type for messages
 type MessageEvent struct {
@@ -105,8 +105,12 @@ func SendJSONMessage(conn net.Conn, mtype string, str []string) error {
 	for i := 0; i < len(str); i++ {
 		msg.Body = append(msg.Body, str[i])
 	}
-	b, _ := msg.MarshalMSG()
-	_, err := conn.Write(b)
+	b, err := msg.MarshalMSG()
+	if err != nil {
+		log.Println(err)
+		return err
+	}
+	_, err = conn.Write(b)
 	return err
 }
 

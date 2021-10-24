@@ -6,6 +6,8 @@ import (
 	"os"
 	"runtime"
 	"strconv"
+
+	"github.com/Xuanwo/go-locale"
 )
 
 func NewLine() string {
@@ -54,4 +56,20 @@ func PortOK(p string) bool {
 		return false
 	}
 	return false
+}
+
+func GetLocale() string {
+	tag, err := locale.Detect()
+	if err != nil {
+		return "en"
+	} else {
+		if len(tag.String()) > 2 {
+			return tag.String()[:2]
+		} else {
+			if len(tag.String()) == 2 {
+				return tag.String()
+			}
+		}
+	}
+	return tag.String()
 }

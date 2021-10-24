@@ -41,18 +41,17 @@ func handleClientSession(a *models.Application, nick string) error {
 	content := u.newUi()
 	rmsg := models.Message{}
 	// sending init message, format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
-	err1 := models.SendJSONMessage(conn, models.ACTION_INIT, []string{nick, models.REVISION})
+	err = models.SendJSONMessage(conn, models.ACTION_INIT, []string{nick, models.REVISION})
 
-	//try to catch ^C signals etc
-	c := make(chan os.Signal, 2)
-	signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
-	go func() {
-		//intercept signal and start closing roundtrip
-		<-c
-		models.SendJSONMessage(conn, models.ACTION_EXIT, nil)
-	}()
+	if err == nil {
+		//try to intercept ^C signals etc
+		c := make(chan os.Signal, 2)
+		signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
+		go func() {
+			<-c
+			models.SendJSONMessage(conn, models.ACTION_EXIT, nil)
+		}()
 
-	if err1 == nil {
 		go func() {
 			for {
 				rmsg.Body = nil
@@ -97,8 +96,8 @@ func handleClientSession(a *models.Application, nick string) error {
 
 		myWindow.ShowAndRun()
 	} else {
-		a.Logger.Printf(a.Lang.Lookup(a.Config.Locale, "Send Message failed, error is ")+"%v", err1)
-		return err1
+		a.Logger.Printf(a.Lang.Lookup(a.Config.Locale, "Send Message failed, error is ")+"%v", err)
+		return err
 	}
 
 	return nil
