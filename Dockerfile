@@ -16,15 +16,15 @@ COPY utils/* ./utils
 COPY secret/* ./secret
 COPY models/* ./models
 COPY server-tcp/* ./server-tcp
-WORKDIR /app/server-tcp
 
 # Build the application
+WORKDIR /app/server-tcp
 RUN go build -o /gotalk-server
 
 # Export default port
 EXPOSE 8089
 
-# Command example below to run when starting the container with german locale
-#CMD ["/gotalk-server -l de"]
 # Command to run when starting the container
 CMD ["/gotalk-server"]
+# Command example below to run when starting the container with german locale
+#CMD ["/gotalk-server", "-l", "de"]
