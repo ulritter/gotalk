@@ -40,7 +40,8 @@ func handleClientSession(a *models.Application, nick string) error {
 	u := &Ui{win: myWindow, app: guiApp, conn: conn, locale: a.Config.Locale, lang: a.Lang}
 	content := u.newUi()
 	rmsg := models.Message{}
-	// sending init message, format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
+
+	// send init message, format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
 	err = models.SendJSONMessage(conn, models.ACTION_INIT, []string{nick, models.REVISION})
 
 	if err == nil {

@@ -35,8 +35,9 @@ func main() {
 
 	logger := log.New(os.Stderr, "", log.Ldate|log.Ltime)
 	a := &models.Application{
-		Logger: logger,
-		Config: appConfig,
+		Logger:  logger,
+		Config:  appConfig,
+		Version: models.REVISION,
 	}
 	a.InitLocalization()
 	get_going(a)

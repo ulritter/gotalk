@@ -7,6 +7,8 @@ import (
 	"gotalk/models"
 	"gotalk/secret"
 	"gotalk/utils"
+	"os"
+	"path"
 
 	"github.com/alecthomas/kong"
 )
@@ -17,12 +19,13 @@ var cli struct {
 	Nick        string `help:"Nickname to be used." short:"n" default:"J_Doe"`
 	Locale      string `help:"Language setting to be used." short:"l" `
 	Environment string `help:"Application environment (development|production)." short:"e" default:"development"`
+	Version     bool   `help:"Show Version." short:"v"`
 }
 
 func get_going(a *models.Application) {
 
 	kong.Parse(&cli,
-		kong.Name("gotalk"),
+		kong.Name(os.Args[0]),
 		kong.Description("An instant chat client."),
 		kong.UsageOnError(),
 		kong.ConfigureHelp(kong.HelpOptions{
@@ -30,7 +33,15 @@ func get_going(a *models.Application) {
 			Summary: true,
 		}),
 	)
-
+	if cli.Version {
+		fmt.Printf(
+			a.Config.Newline+
+				"%s (client) "+a.Lang.Lookup(a.Config.Locale, "version")+
+				": %s"+
+				a.Config.Newline+a.Config.Newline,
+			path.Base(os.Args[0]), a.Version)
+		return
+	}
 	a.Config.Server = false
 	a.Config.Addr = cli.Address
 	a.Config.Port = cli.Port

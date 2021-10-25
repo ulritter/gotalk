@@ -139,7 +139,8 @@ type Config struct {
 }
 
 type Application struct {
-	Config Config
-	Logger *log.Logger
-	Lang   *language.Config
+	Config  Config
+	Logger  *log.Logger
+	Lang    *language.Config
+	Version string
 }
