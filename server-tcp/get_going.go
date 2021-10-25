@@ -21,13 +21,6 @@ var cli struct {
 
 func get_going(a *models.Application) {
 
-	// if len(os.Args) == 2 {
-	// 	if (os.Args[1] == "-v") || (os.Args[1] == "--version") {
-	// 		fmt.Printf("%s (server) "+a.Lang.Lookup(a.Config.Locale, "version")+": %s"+a.Config.Newline, path.Base(os.Args[0]), a.Version)
-	// 		return
-	// 	}
-	// }
-
 	kong.Parse(&cli,
 		kong.Name(os.Args[0]),
 		kong.Description("An instant chat server."),
