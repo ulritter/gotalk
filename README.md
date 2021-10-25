@@ -28,7 +28,7 @@
 &NewLine;  
 &NewLine;  
 
-**Run the software in server mode:**
+**Run the server app:**
 
     gotalk-server [options] 
     Usage: gotalk-server
@@ -37,6 +37,7 @@
         -h, --help           Show context-sensitive help.
         -p, --port="8089"    Port number.
         -l, --locale="en"    Language setting to be used.
+        -v, --version                      Show Version.
 
 **Examples:**
 
@@ -48,7 +49,7 @@
 
 Server termination by SIGHUP (for the time being)
 
-**Run the software in client mode:**
+**Run the client app:**
 
 	gotalk-client [options]
 
@@ -60,6 +61,7 @@ Server termination by SIGHUP (for the time being)
         -p, --port="8089"            Port number.
         -n, --nick="J_Doe"           Nickname to be used.
         -l, --locale="en"            Language setting to be used.
+        -v, --version                Show Version.
 
 **Examples:**
 
@@ -101,9 +103,15 @@ Color Controls (long form and short form for each control)
 In all cases \<address\> defaults to `localhost`, \<port\> defaults to `8089`, and \<nickname\> defaults to `J_Doe`,
 and \<locale\> defaults to the actual system setting. If no translation is available it falls back to english.
 
+
+**Localization:**
+The language.json file provides for language translations. The structure is pretty self explanatory. To add a new language, just duplicate the string pack for one language and translate the respective message string (right hand values, the left hand values are keys).
+  
+
+**Deployment Options:**
+Sample Dockerfile for the server ist included.
+
+
 TODOS:
 - switch to https based communication
 - create web client (React)
-
-**Deployment Options:**
-- Samlple Dockerfile for TCP server included
