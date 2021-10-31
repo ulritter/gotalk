@@ -1,6 +1,8 @@
 package main
 
 import (
+	"gotalk/constants"
+	"gotalk/localization"
 	"gotalk/models"
 	"gotalk/utils"
 	"log"
@@ -37,8 +39,8 @@ func main() {
 	a := &models.Application{
 		Logger:  logger,
 		Config:  appConfig,
-		Version: models.REVISION,
+		Version: constants.REVISION,
 	}
-	a.InitLocalization()
+	localization.InitLocalization(a)
 	get_going(a)
 }

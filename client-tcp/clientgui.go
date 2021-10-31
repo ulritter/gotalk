@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gotalk/constants"
 	"gotalk/models"
 	"image/color"
 	"net"
@@ -272,28 +273,28 @@ func (u *Ui) ShowStatus(msg []string, test bool) {
 func (u *Ui) parseInput() error {
 	msg := u.input.Text
 	if len(msg) > 0 {
-		if msg[0] != models.CMD_PREFIX {
-			return (models.SendJSONMessage(u.conn, models.ACTION_SENDMESSAGE, []string{msg}))
+		if msg[0] != constants.CMD_PREFIX {
+			return (models.SendJSONMessage(u.conn, constants.ACTION_SENDMESSAGE, []string{msg}))
 		} else {
 			cmd := strings.Fields(msg)
 			lc := len(cmd)
 			cmd[0] = cmd[0][1:] // strip leading command symbol
 
 			switch cmd[0] {
-			case models.CMD_EXIT1:
+			case constants.CMD_EXIT1:
 				fallthrough
-			case models.CMD_EXIT2:
+			case constants.CMD_EXIT2:
 				fallthrough
-			case models.CMD_EXIT3:
+			case constants.CMD_EXIT3:
 				if lc == 1 {
-					models.SendJSONMessage(u.conn, models.ACTION_EXIT, nil)
+					models.SendJSONMessage(u.conn, constants.ACTION_EXIT, nil)
 				} else {
 					u.showError()
 					return nil
 				}
-			case models.CMD_HELP:
+			case constants.CMD_HELP:
 				fallthrough
-			case models.CMD_HELP1:
+			case constants.CMD_HELP1:
 				if lc == 1 {
 					u.showHelp()
 					return nil
@@ -301,21 +302,21 @@ func (u *Ui) parseInput() error {
 					u.showError()
 					return nil
 				}
-			case models.CMD_LISTUSERS:
+			case constants.CMD_LISTUSERS:
 				if lc == 1 {
-					return (models.SendJSONMessage(u.conn, models.ACTION_LISTUSERS, nil))
+					return (models.SendJSONMessage(u.conn, constants.ACTION_LISTUSERS, nil))
 				} else {
 					u.showError()
 					return nil
 				}
-			case models.CMD_CHANGENICK:
+			case constants.CMD_CHANGENICK:
 				cmdErr := false
 				if lc == 2 {
 					cmd_arguments := cmd[1:]
 					if len(cmd_arguments) != 1 || len(cmd_arguments[0]) == 0 {
 						cmdErr = true
 					} else {
-						return (models.SendJSONMessage(u.conn, models.ACTION_CHANGENICK, []string{cmd_arguments[0]}))
+						return (models.SendJSONMessage(u.conn, constants.ACTION_CHANGENICK, []string{cmd_arguments[0]}))
 					}
 				} else {
 					cmdErr = true

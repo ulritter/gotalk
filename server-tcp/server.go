@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"gotalk/constants"
 	"gotalk/models"
 	"net"
 	"strings"
@@ -11,7 +12,7 @@ import (
 
 // read from connection, recognize request types and pass appropriate event types to the session handler (serverDialog())
 func handleConnection(a *models.Application) error {
-	buf := make([]byte, models.BUFSIZE)
+	buf := make([]byte, constants.BUFSIZE)
 
 	session := &models.Session{Conn: a.Config.Conn}
 	n, err := a.Config.Conn.Read(buf)
@@ -23,16 +24,16 @@ func handleConnection(a *models.Application) error {
 	msg.Body = nil
 	msg.UnmarshalMSG(buf[:n])
 
-	if (msg.Action != models.ACTION_INIT) || (len(msg.Body) != 2) {
+	if (msg.Action != constants.ACTION_INIT) || (len(msg.Body) != 2) {
 		return fmt.Errorf(a.Lang.Lookup(a.Config.Locale, "Wrong connection initialization message."))
 	} else {
 		// expecting format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
-		if msg.Body[1] != models.REVISION {
-			models.SendJSONMessage(a.Config.Conn, models.ACTION_REVISION, []string{models.REVISION})
+		if msg.Body[1] != constants.REVISION {
+			models.SendJSONMessage(a.Config.Conn, constants.ACTION_REVISION, []string{constants.REVISION})
 			return fmt.Errorf(a.Lang.Lookup(a.Config.Locale,
 				"Connection request from ")+a.Config.Conn.RemoteAddr().(*net.TCPAddr).IP.String()+a.Lang.Lookup(a.Config.Locale,
 				" rejected. ")+a.Lang.Lookup(a.Config.Locale,
-				"Wrong client revision level. Should be: ")+" %s"+a.Lang.Lookup(a.Config.Locale, ", actual: ")+"%s", models.REVISION, msg.Body[1])
+				"Wrong client revision level. Should be: ")+" %s"+a.Lang.Lookup(a.Config.Locale, ", actual: ")+"%s", constants.REVISION, msg.Body[1])
 		}
 	}
 	user := &models.User{Name: msg.Body[0], Session: session, Timejoined: time.Now().Format("2006.01.02 15:04:05")}
@@ -62,10 +63,10 @@ func handleConnection(a *models.Application) error {
 			a.Logger.Println(err2)
 		}
 
-		if msg.Action == models.ACTION_EXIT {
+		if msg.Action == constants.ACTION_EXIT {
 			a.Logger.Printf(a.Lang.Lookup(a.Config.Locale, "End condition, closing connection for:")+" %s"+a.Config.Newline, user.Name)
 			//echo exit condition for organized client shutdown
-			models.SendJSONMessage(a.Config.Conn, models.ACTION_EXIT, nil)
+			models.SendJSONMessage(a.Config.Conn, constants.ACTION_EXIT, nil)
 			a.Config.Ch <- models.ClientInput{
 				User:  user,
 				Event: &models.UserLeftEvent{User: user, Msg: a.Lang.Lookup(a.Config.Locale, "Goodbye")},
@@ -74,19 +75,19 @@ func handleConnection(a *models.Application) error {
 		}
 
 		switch msg.Action {
-		case models.ACTION_CHANGENICK:
+		case constants.ACTION_CHANGENICK:
 			if len(msg.Body) == 1 {
 				a.Config.Ch <- models.ClientInput{
 					User:  user,
 					Event: &models.UserChangedNickEvent{User: user, Nick: msg.Body[0]},
 				}
 			}
-		case models.ACTION_LISTUSERS:
+		case constants.ACTION_LISTUSERS:
 			a.Config.Ch <- models.ClientInput{
 				User:  user,
 				Event: &models.ListUsersEvent{User: user},
 			}
-		case models.ACTION_SENDMESSAGE:
+		case constants.ACTION_SENDMESSAGE:
 			if len(msg.Body) == 1 {
 				sendmsg := strings.TrimSpace(msg.Body[0])
 				e := models.ClientInput{User: user, Event: &models.MessageEvent{Msg: sendmsg}}

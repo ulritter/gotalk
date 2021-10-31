@@ -3,6 +3,7 @@ package main
 import (
 	"crypto/tls"
 	"fmt"
+	"gotalk/constants"
 	"gotalk/models"
 	"net"
 	"os"
@@ -24,7 +25,7 @@ func ciao(w fyne.Window, c net.Conn, e int) {
 // it starts the conenction to the server, listens to the server,
 // creates the ui and starts the fyne ui loop
 func handleClientSession(a *models.Application, nick string) error {
-	buf := make([]byte, models.BUFSIZE)
+	buf := make([]byte, constants.BUFSIZE)
 	adr := a.Config.Addr + a.Config.Port
 	a.Logger.Println("address: ", adr)
 	conn, err := tls.Dial("tcp", adr, a.Config.TLSconfig)
@@ -42,7 +43,7 @@ func handleClientSession(a *models.Application, nick string) error {
 	rmsg := models.Message{}
 
 	// send init message, format {models.ACTION_INIT, [{<nickname>}, {<revision level>}]}
-	err = models.SendJSONMessage(conn, models.ACTION_INIT, []string{nick, models.REVISION})
+	err = models.SendJSONMessage(conn, constants.ACTION_INIT, []string{nick, constants.REVISION})
 
 	if err == nil {
 		//try to intercept ^C signals etc
@@ -50,7 +51,7 @@ func handleClientSession(a *models.Application, nick string) error {
 		signal.Notify(c, os.Interrupt, syscall.SIGTERM, syscall.SIGHUP, syscall.SIGQUIT)
 		go func() {
 			<-c
-			models.SendJSONMessage(conn, models.ACTION_EXIT, nil)
+			models.SendJSONMessage(conn, constants.ACTION_EXIT, nil)
 		}()
 
 		go func() {
@@ -61,18 +62,18 @@ func handleClientSession(a *models.Application, nick string) error {
 					err := rmsg.UnmarshalMSG(buf[:n])
 					if err == nil {
 						switch rmsg.Action {
-						case models.ACTION_SENDMESSAGE:
+						case constants.ACTION_SENDMESSAGE:
 							u.ShowMessage(rmsg.Body, false)
-						case models.ACTION_SENDSTATUS:
+						case constants.ACTION_SENDSTATUS:
 							u.ShowStatus(rmsg.Body, false)
-						case models.ACTION_EXIT:
+						case constants.ACTION_EXIT:
 							fmt.Println(a.Config.Newline + a.Lang.Lookup(a.Config.Locale, "Goodbye") + a.Config.Newline)
 							ciao(myWindow, conn, 0)
-						case models.ACTION_REVISION:
-							if rmsg.Body[0] != models.REVISION {
+						case constants.ACTION_REVISION:
+							if rmsg.Body[0] != constants.REVISION {
 								fmt.Printf(a.Lang.Lookup(a.Config.Locale,
 									"Wrong client revision level. Should be: ")+" %s"+a.Lang.Lookup(a.Config.Locale,
-									", actual: ")+"%s"+a.Config.Newline, rmsg.Body[0], models.REVISION)
+									", actual: ")+"%s"+a.Config.Newline, rmsg.Body[0], constants.REVISION)
 								ciao(myWindow, conn, 1)
 							}
 						}
@@ -92,7 +93,7 @@ func handleClientSession(a *models.Application, nick string) error {
 
 		//intercept quit and start closing roundtrip
 		myWindow.SetCloseIntercept(func() {
-			models.SendJSONMessage(conn, models.ACTION_EXIT, nil)
+			models.SendJSONMessage(conn, constants.ACTION_EXIT, nil)
 		})
 
 		myWindow.ShowAndRun()

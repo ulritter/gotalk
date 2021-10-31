@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gotalk/constants"
 	"gotalk/models"
 	"runtime"
 	"testing"
@@ -25,21 +26,21 @@ func TestClientSession(t *testing.T) {
 					err := testMsg.UnmarshalMSG(testBuf[:n])
 					if err == nil {
 						switch testMsg.Action {
-						case models.ACTION_SENDMESSAGE:
+						case constants.ACTION_SENDMESSAGE:
 							if len(testMsg.Body) == 0 {
 								t.Errorf("bad test user message")
 								t.Fail()
 							} else {
 								t.Log("ACTION_SENDMESSAGE passed")
 							}
-						case models.ACTION_SENDSTATUS:
+						case constants.ACTION_SENDSTATUS:
 							if len(testMsg.Body) == 0 {
 								t.Errorf("bad test status mesage")
 								t.Fail()
 							} else {
 								t.Log("ACTION_SENDSTATUS passed")
 							}
-						case models.ACTION_REVISION:
+						case constants.ACTION_REVISION:
 							if len(testMsg.Body) != 1 {
 								t.Errorf("bad test revision message")
 								t.Fail()
@@ -70,7 +71,7 @@ func TestClientSession(t *testing.T) {
 	testSnd.Body = append(testSnd.Body, "Test status")
 	testSession.WriteStatus(testSnd.Body)
 
-	models.SendJSONMessage(testSession.Conn, models.ACTION_REVISION, []string{models.REVISION})
+	models.SendJSONMessage(testSession.Conn, constants.ACTION_REVISION, []string{constants.REVISION})
 
 	quit <- true
 

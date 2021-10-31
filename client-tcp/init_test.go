@@ -1,6 +1,7 @@
 package main
 
 import (
+	"gotalk/constants"
 	"gotalk/models"
 	"gotalk/utils"
 	"log"
@@ -30,7 +31,7 @@ var newline string
 
 func testSetUp() {
 	cfg := language.New()
-	cfg.BindPath(models.LANGFILE)
+	cfg.BindPath(constants.LANGFILE)
 	cfg.BindMainLocale("en")
 	lang, lerr := cfg.Init()
 	if lerr != nil {
@@ -55,7 +56,7 @@ func testSetUp() {
 		}
 	}
 
-	testBuf = make([]byte, models.BUFSIZE)
+	testBuf = make([]byte, constants.BUFSIZE)
 
 	server, client = net.Pipe()
 
