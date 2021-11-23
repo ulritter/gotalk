@@ -148,9 +148,8 @@ type Ui struct {
 	conn    net.Conn
 	locale  string
 	lang    *language.Config
-	//for future use
-	mMsgs []MessageLine
-	sMsgs []MessageLine
+	mMsgs   []MessageLine
+	sMsgs   []MessageLine
 }
 
 //create new ui structure with fyne elements and
