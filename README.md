@@ -15,10 +15,11 @@
   - windows:  for 64 bit gcc (if not already installed) get the MinGW-w64 installer on the website below and chose x86_64 architecture during install:
 - install command line parser (`go get github.com/alecthomas/kong`)
 - install localization package: (`go get github.com/moemoe89/go-localization`)
-- run `openssl ecparam -genkey -name prime256v1 -out server.key` (not necessary if you are only running the client)
+- run `openssl ecparam -genkey -name prime256v1 -out server.key` 
 - run `openssl req -new -x509 -key server.key -out root_cert.pem -days 3650`
   - move `root_cert.pem` file to an appropriate location or leave it in clone root (default)
   - move `server.key` file to an appropriate location or leave it in clone root (default)
+  - make sure the clients receive the root certificate (public key) file
 - install `make`if not already present on your system
 - run `make all` to build both client and server binaries (target: `./bin` directory)
 - run `make client` to build the client binary (target: `./bin` directory)
@@ -34,10 +35,13 @@
     Usage: gotalk-server
 
     Flags:
-        -h, --help           Show context-sensitive help.
-        -p, --port="8089"    Port number.
-        -l, --locale="en"    Language setting to be used.
-        -v, --version                      Show Version.
+      -h, --help                           Show context-sensitive help.
+      -p, --port="8089"                    Port number.
+      -l, --locale=STRING                  Language setting to be used.
+      -c, --root-cert="./root_cert.pem"    Path to root certificate for TLS.
+      -k, --server-key="./server.key"      Path to server key for TLS.
+      -e, --environment="development"      Application environment (development|production).
+      -v, --version                        Show Version.
 
 **Examples:**
 
@@ -56,12 +60,14 @@ Server termination by SIGHUP (for the time being)
     Usage: gotalk-client
 
     Flags:
-        -h, --help                   Show context-sensitive help.
-        -a, --address="localhost"    IP address or domain name.
-        -p, --port="8089"            Port number.
-        -n, --nick="J_Doe"           Nickname to be used.
-        -l, --locale="en"            Language setting to be used.
-        -v, --version                Show Version.
+      -h, --help                           Show context-sensitive help.
+      -a, --address="localhost"            IP address or domain name.
+      -p, --port="8089"                    Port number.
+      -l, --locale=STRING                  Language setting to be used.
+      -c, --root-cert="./root_cert.pem"    Path to root certificate for TLS.
+      -n, --nick="J_Doe"                   Nickname to be used.
+      -e, --environment="development"      Application environment (development|production).
+      -v, --version                        Show Version.
 
 **Examples:**
 
