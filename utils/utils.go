@@ -43,6 +43,7 @@ func GetFileFromGithub(filepath string, url string) error {
 	return err
 }
 
+// check if port number is made of numbers and preceded by colon, fix the latter, if necessary
 func PortOK(p string) bool {
 
 	if p[0] == ':' && len(p) > 1 {
@@ -58,6 +59,7 @@ func PortOK(p string) bool {
 	return false
 }
 
+// get system locale setting
 func GetLocale() string {
 	tag, err := locale.Detect()
 	if err != nil {

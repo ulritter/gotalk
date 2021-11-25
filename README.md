@@ -6,6 +6,8 @@
 &NewLine; 
 **Build the software:**
 - install golang
+- clone / download this repo
+- change directory to root of this repo clone
 - install fyne (see also https://developer.fyne.io/index.html)
 - install fyne system dependencies, e.g.:
   - Linux: on a standard Ubuntu 20.04 distro I had to install:
@@ -13,12 +15,10 @@
   - windows:  for 64 bit gcc (if not already installed) get the MinGW-w64 installer on the website below and chose x86_64 architecture during install:
 - install command line parser (`go get github.com/alecthomas/kong`)
 - install localization package: (`go get github.com/moemoe89/go-localization`)
-- clone / download this repo
-- rename `secret.go.example` to `secret.go`
-- run `openssl ecparam -genkey -name prime256v1 -out server.key`
-- replace `serverKey` constant dummy content with content of `server.key` file
-- run `openssl req -new -x509 -key server.key -out server.pem -days 3650`
-- replace `rootCert` constant dummy content with content of `server.pem` file
+- run `openssl ecparam -genkey -name prime256v1 -out server.key` (not necessary if you are only running the client)
+  - move `server.key` file to an appropriate location or leave it in clone root (default)
+- run `openssl req -new -x509 -key server.key -out root_cert.pem -days 3650`
+  - move `root_cert.pem` file to an appropriate location or leave it in clone root (default)
 - install `make`if not already present on your system
 - run `make all` to build both client and server binaries (target: `./bin` directory)
 - run `make client` to build the client binary (target: `./bin` directory)

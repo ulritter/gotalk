@@ -15,6 +15,8 @@ import (
 var cli struct {
 	Port        string `help:"Port number." short:"p" default:"8089"`
 	Locale      string `help:"Language setting to be used." short:"l"`
+	RootCert    string `help:"Path to root certificate for TLS." short:"c" default:"./root_cert.pem"`
+	ServerKey   string `help:"Path to server key for TLS." short:"k" default:"./server.key"`
 	Environment string `help:"Application environment (development|production)." short:"e" default:"development"`
 	Version     bool   `help:"Show Version." short:"v"`
 }
@@ -56,7 +58,7 @@ func get_going(a *models.Application) {
 		a.Config.Ch = make(chan models.ClientInput)
 
 		go handleServerSession(a)
-		cer, err := tls.X509KeyPair([]byte(secret.RootCert), []byte(secret.ServerKey))
+		cer, err := tls.X509KeyPair([]byte(secret.RootCert(cli.RootCert)), []byte(secret.ServerKey(cli.ServerKey)))
 		a.Config.TLSconfig = &tls.Config{Certificates: []tls.Certificate{cer}}
 		if err != nil {
 			a.Logger.Fatal(err)

@@ -16,8 +16,9 @@ import (
 var cli struct {
 	Address     string `help:"IP address or domain name." short:"a" default:"localhost"`
 	Port        string `help:"Port number." short:"p" default:"8089"`
-	Nick        string `help:"Nickname to be used." short:"n" default:"J_Doe"`
 	Locale      string `help:"Language setting to be used." short:"l" `
+	RootCert    string `help:"Path to root certificate for TLS." short:"c" default:"./root_cert.pem"`
+	Nick        string `help:"Nickname to be used." short:"n" default:"J_Doe"`
 	Environment string `help:"Application environment (development|production)." short:"e" default:"development"`
 	Version     bool   `help:"Show Version." short:"v"`
 }
@@ -54,7 +55,7 @@ func get_going(a *models.Application) {
 	a.Config.Env = cli.Environment
 	if utils.PortOK(a.Config.Port) {
 		roots := x509.NewCertPool()
-		ok := roots.AppendCertsFromPEM([]byte(secret.RootCert))
+		ok := roots.AppendCertsFromPEM([]byte(secret.RootCert(cli.RootCert)))
 		if !ok {
 			a.Logger.Fatal(a.Lang.Lookup(a.Config.Locale, "Failed to parse root certificate"))
 		}

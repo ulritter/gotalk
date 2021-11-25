@@ -6,5 +6,6 @@ gotalk-client.exe
 gotalk.exe
 server.key
 server.pem
-secret.go
 clientgui.tst
+root_cert.pem
+server.key
