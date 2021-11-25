@@ -55,7 +55,7 @@ func get_going(a *models.Application) {
 	a.Config.Env = cli.Environment
 	if utils.PortOK(a.Config.Port) {
 		roots := x509.NewCertPool()
-		ok := roots.AppendCertsFromPEM([]byte(secret.RootCert(cli.RootCert)))
+		ok := roots.AppendCertsFromPEM([]byte(secret.GetKey(cli.RootCert)))
 		if !ok {
 			a.Logger.Fatal(a.Lang.Lookup(a.Config.Locale, "Failed to parse root certificate"))
 		}

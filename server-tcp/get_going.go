@@ -58,7 +58,7 @@ func get_going(a *models.Application) {
 		a.Config.Ch = make(chan models.ClientInput)
 
 		go handleServerSession(a)
-		cer, err := tls.X509KeyPair([]byte(secret.RootCert(cli.RootCert)), []byte(secret.ServerKey(cli.ServerKey)))
+		cer, err := tls.X509KeyPair([]byte(secret.GetKey(cli.RootCert)), []byte(secret.GetKey(cli.ServerKey)))
 		a.Config.TLSconfig = &tls.Config{Certificates: []tls.Certificate{cer}}
 		if err != nil {
 			a.Logger.Fatal(err)
