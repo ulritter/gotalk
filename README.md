@@ -16,9 +16,9 @@
 - install command line parser (`go get github.com/alecthomas/kong`)
 - install localization package: (`go get github.com/moemoe89/go-localization`)
 - run `openssl ecparam -genkey -name prime256v1 -out server.key` (not necessary if you are only running the client)
-  - move `server.key` file to an appropriate location or leave it in clone root (default)
 - run `openssl req -new -x509 -key server.key -out root_cert.pem -days 3650`
   - move `root_cert.pem` file to an appropriate location or leave it in clone root (default)
+  - move `server.key` file to an appropriate location or leave it in clone root (default)
 - install `make`if not already present on your system
 - run `make all` to build both client and server binaries (target: `./bin` directory)
 - run `make client` to build the client binary (target: `./bin` directory)
