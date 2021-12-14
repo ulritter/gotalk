@@ -44,6 +44,8 @@ type Colorfield struct {
 // color structures for both light and dark themes
 //to add new colors, just add them here and they
 //will be automatically both recognized and processed
+const NUMBER_COLORS = 7
+
 var cmap_light = map[string]Colorfield{
 	"$cyan":   {color.RGBA{20, 150, 220, 255}, 5},
 	"$c":      {color.RGBA{20, 150, 220, 255}, 2},
@@ -406,7 +408,7 @@ func checkColor(returnString string) (*color.RGBA, string, bool) {
 	//While this might look clumsy, we can now add any new color
 	//to the map definition(s) and it will be automatically
 	//recognized
-	for i := 7; i > 1; i-- {
+	for i := NUMBER_COLORS; i > 1; i-- {
 		for colorKey, colorcode := range cmap {
 			if colorcode.len == i {
 				if (len(returnString) == colorcode.len) && (returnString == colorKey) {
